@@ -1,0 +1,91 @@
+version: "3.9"
+
+x-environment-defaults: &environment-defaults
+  DATABASE_URL: "postgresql://django:django-QWErty!2@db:5432/django"
+  DEBUG: 1
+
+services:
+  django:
+    build: ./service
+    command: sh -c "gunicorn --bind 0.0.0.0:8000 service.wsgi:application"
+    volumes:
+      - ./service:/service
+      - static_data:/service/static
+    depends_on:
+      - db
+    expose:
+      - 8000
+    environment:
+       <<: *environment-defaults
+
+  db:
+    image: postgres:16-alpine
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=django
+      - POSTGRES_PASSWORD=django-QWErty!2
+      - POSTGRES_DB=django
+
+  nginx:
+    image: nginx:1.19.8-alpine
+    depends_on:
+      - django
+    ports:
+      - "80:80"
+    volumes:
+      - static_data:/var/www/html/static/
+      - ./nginx:/etc/nginx/conf.d
+
+  redis:
+    image: redis:latest
+    expose:
+      - 6379
+    volumes:
+      - redis_data:/data
+
+  celery_worker:
+    build: ./service
+    command: celery -A service worker --loglevel=info
+    volumes:
+      - ./service:/service
+      - static_data:/service/static
+    depends_on:
+      - db
+      - redis
+    environment:
+      <<: *environment-defaults
+
+  celery_beat:
+    build: ./service
+    command: celery -A service beat --loglevel=info
+    volumes:
+      - ./service:/service
+      - static_data:/service/static
+    depends_on:
+      - db
+      - redis
+    environment:
+      <<: *environment-defaults
+
+  flower:
+    build: ./service
+    hostname: flower
+    command: celery -A service flower
+    volumes:
+      - ./service:/service
+      - static_data:/service/static
+    links:
+      - redis
+    depends_on:
+      - redis
+    ports:
+      - "5555:5555"
+    environment:
+      <<: *environment-defaults
+volumes:
+  pg_data:
+  static_data:
+  redis_data:
