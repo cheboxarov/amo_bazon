@@ -67,6 +67,8 @@ class Bazon:
         return response
 
     def get_products(self, params: dict = {}) -> requests.Response:
+        if params.get("order") is None:
+            params["order"] = "desc"
         url = "https://kontrabaz.baz-on.ru/external-api/v1/getProducts"
 
         response = requests.get(url, headers=self._headers, params=params)

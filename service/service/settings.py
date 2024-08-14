@@ -137,8 +137,12 @@ from datetime import timedelta
 
 # Настройки расписания для Celery Beat
 CELERY_BEAT_SCHEDULE = {
-    "test": {
+    "get_documents": {
         "task": "bazon.tasks.update_sale_documents",
+        "schedule": timedelta(minutes=1),
+    },
+    "get_products": {
+        "task": "bazon.tasks.get_products",
         "schedule": timedelta(minutes=1),
     },
 }

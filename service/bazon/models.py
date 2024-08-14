@@ -14,7 +14,7 @@ class BazonAccount(models.Model):
         self.refresh_token = bazon.get_refresh_token()
         self.access_token = bazon.get_access_token()
 
-    def refresh_token(self):
+    def refresh_auth(self):
         bazon = Bazon(login=self.login, password=self.password)
         bazon.refresh_me()
         self.refresh_token = bazon.get_refresh_token()
@@ -28,6 +28,8 @@ class BazonAccount(models.Model):
 
         return super().save(*args, **kwargs)
 
+    def __str__(self):
+        return self.name
 
 class SaleDocument(models.Model):
 
@@ -42,12 +44,14 @@ class SaleDocument(models.Model):
     contractor_name = models.CharField(max_length=255, null=True, blank=True)
     manager_id = models.PositiveIntegerField(null=True, blank=True)
     manager_name = models.CharField(max_length=255, null=True, blank=True)
+    amo_lead_id = models.PositiveIntegerField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.internal_id} ({self.contractor_name})"
 
 
 class Product(models.Model):
+    bazon_account = models.ForeignKey(BazonAccount, on_delete=models.CASCADE)
     internal_id = models.PositiveIntegerField()
     created_at = models.CharField(max_length=500)
     name = models.CharField(max_length=500)
