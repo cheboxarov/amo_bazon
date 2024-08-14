@@ -4,13 +4,13 @@ from celery import Celery
 
 
 # Установка переменной окружения для настроек проекта
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'service.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "service.settings")
 
 # Создание экземпляра объекта Celery
-app = Celery('service')
+app = Celery("service")
 
 # Загрузка настроек из файла Django
-app.config_from_object('django.conf:settings', namespace='CELERY')
+app.config_from_object("django.conf:settings", namespace="CELERY")
 
 app.conf.broker_connection_retry_on_startup = True
 

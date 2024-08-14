@@ -7,19 +7,32 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='BazonAccount',
+            name="BazonAccount",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(db_index=True, max_length=255)),
-                ('login', models.CharField(max_length=255)),
-                ('password', models.CharField(max_length=255)),
-                ('refresh_token', models.CharField(blank=True, max_length=255, null=True)),
-                ('access_token', models.CharField(blank=True, max_length=255, null=True)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(db_index=True, max_length=255)),
+                ("login", models.CharField(max_length=255)),
+                ("password", models.CharField(max_length=255)),
+                (
+                    "refresh_token",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "access_token",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
             ],
         ),
     ]

@@ -7,25 +7,45 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bazon', '0002_alter_bazonaccount_access_token_and_more'),
+        ("bazon", "0002_alter_bazonaccount_access_token_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='SaleDocument',
+            name="SaleDocument",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('internal_id', models.PositiveIntegerField(unique=True)),
-                ('number', models.CharField(blank=True, max_length=255, null=True)),
-                ('type', models.CharField(blank=True, max_length=50, null=True)),
-                ('status', models.CharField(blank=True, max_length=50, null=True)),
-                ('sum', models.PositiveIntegerField(blank=True, null=True)),
-                ('storage_id', models.PositiveIntegerField(blank=True, null=True)),
-                ('contractor_id', models.PositiveIntegerField(blank=True, null=True)),
-                ('contractor_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('manager_id', models.PositiveIntegerField(blank=True, null=True)),
-                ('manager_name', models.CharField(blank=True, max_length=255, null=True)),
-                ('bazon_account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bazon.bazonaccount')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("internal_id", models.PositiveIntegerField(unique=True)),
+                ("number", models.CharField(blank=True, max_length=255, null=True)),
+                ("type", models.CharField(blank=True, max_length=50, null=True)),
+                ("status", models.CharField(blank=True, max_length=50, null=True)),
+                ("sum", models.PositiveIntegerField(blank=True, null=True)),
+                ("storage_id", models.PositiveIntegerField(blank=True, null=True)),
+                ("contractor_id", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "contractor_name",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                ("manager_id", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "manager_name",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "bazon_account",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="bazon.bazonaccount",
+                    ),
+                ),
             ],
         ),
     ]

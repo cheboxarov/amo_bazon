@@ -14,6 +14,13 @@ class BazonAccount(models.Model):
         self.refresh_token = bazon.get_refresh_token()
         self.access_token = bazon.get_access_token()
 
+    def refresh_token(self):
+        bazon = Bazon(login=self.login, password=self.password)
+        bazon.refresh_me()
+        self.refresh_token = bazon.get_refresh_token()
+        self.access_token = bazon.get_access_token()
+        self.save()
+
     def save(self, *args, **kwargs):
 
         if not bool(self.id):
@@ -35,3 +42,22 @@ class SaleDocument(models.Model):
     contractor_name = models.CharField(max_length=255, null=True, blank=True)
     manager_id = models.PositiveIntegerField(null=True, blank=True)
     manager_name = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.internal_id} ({self.contractor_name})"
+
+
+class Product(models.Model):
+    internal_id = models.PositiveIntegerField()
+    created_at = models.CharField(max_length=500)
+    name = models.CharField(max_length=500)
+    type = models.CharField(max_length=50)
+    price = models.PositiveIntegerField()
+    amount = models.PositiveIntegerField()
+    reserved = models.PositiveIntegerField()
+    last_rack = models.TextField()
+    in_storages = models.TextField()
+    in_movings_to = models.TextField()
+
+    def __str__(self):
+        return f"{self.name} ({self.internal_id})"
