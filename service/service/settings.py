@@ -141,8 +141,8 @@ CELERY_BEAT_SCHEDULE = {
         "task": "bazon.tasks.update_sale_documents",
         "schedule": timedelta(minutes=1),
     },
-    "get_products": {
-        "task": "bazon.tasks.get_products",
-        "schedule": timedelta(minutes=1),
-    },
+    # "get_products": {
+    #     "task": "bazon.tasks.get_products",
+    #     "schedule": timedelta(minutes=1),
+    # },
 }
