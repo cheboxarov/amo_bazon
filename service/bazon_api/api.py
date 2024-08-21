@@ -3,6 +3,7 @@ import json
 import requests
 from typing import Collection
 
+
 class Bazon:
 
     def __init__(
