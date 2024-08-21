@@ -3,7 +3,6 @@ import json
 import requests
 from typing import Collection
 
-
 class Bazon:
 
     def __init__(
@@ -79,8 +78,6 @@ class Bazon:
     ) -> requests.Response:
         data = {
             "request": {
-                "getSaleSourcesReference": {"where": {"isArchive": 0}, "_": ""},
-                "getCompanyConfig": {"_": ""},
                 "getDocument": {"number": str(document_id), "type": "sale", "_": ""},
                 "getDocumentItems": {
                     "order": {"id": "asc"},
@@ -90,30 +87,6 @@ class Bazon:
                         "documentType": "sale",
                         "state!=": ["removed", "removed_to_other_sale"],
                     },
-                    "_": "",
-                },
-                "getOperations": {
-                    "order": {"id": "desc"},
-                    "viewMode": "raw",
-                    "where": {
-                        "documentNumber": str(document_id),
-                        "documentType": "sale",
-                    },
-                    "_": "",
-                },
-                "getSentMessages": {
-                    "where": {
-                        "documentNumber": str(document_id),
-                        "documentType": "sale",
-                    },
-                    "_": "",
-                },
-                "getStoragesReference:full": {"_": ""},
-                "getUsersReference": {"where": {}, "_": ""},
-                "setDocumentLock": {
-                    "type": "sale",
-                    "number": str(document_id),
-                    "prevLockKey": "8a5a5965-1986-476d-97aa-058c4ed1a889",
                     "_": "",
                 },
             },
