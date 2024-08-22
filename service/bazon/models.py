@@ -32,23 +32,6 @@ class BazonAccount(models.Model):
         return self.name
 
 
-# class Product(models.Model):
-#     bazon_account = models.ForeignKey(BazonAccount, on_delete=models.CASCADE)
-#     internal_id = models.PositiveIntegerField()
-#     created_at = models.CharField(max_length=500)
-#     name = models.CharField(max_length=500)
-#     type = models.CharField(max_length=50)
-#     price = models.PositiveIntegerField()
-#     amount = models.PositiveIntegerField()
-#     reserved = models.PositiveIntegerField()
-#     last_rack = models.TextField()
-#     in_storages = models.TextField()
-#     in_movings_to = models.TextField()
-# 
-#     def __str__(self):
-#         return f"{self.name} ({self.internal_id})"
-
-
 class SaleDocument(models.Model):
 
     bazon_account = models.ForeignKey(BazonAccount, on_delete=models.CASCADE)
@@ -63,7 +46,6 @@ class SaleDocument(models.Model):
     manager_id = models.PositiveIntegerField(null=True, blank=True)
     manager_name = models.CharField(max_length=255, null=True, blank=True)
     amo_lead_id = models.PositiveIntegerField(blank=True, null=True)
-    # products = models.ManyToManyField(Product, null=True, blank=True)
 
     def __str__(self):
         return f"{self.internal_id} ({self.contractor_name})"
