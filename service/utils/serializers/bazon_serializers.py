@@ -4,8 +4,12 @@ from amo.models import Status, Manager
 
 class BazonSaleToAmoLeadSerializer(BaseSerializer):
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
     def serialize(self):
         serialized_data = {}
+        serialized_data["id"] = self.data.get("internal_id")
         serialized_data["name"] = self.data.get("number")
         bazon_status = self.data.get("status")
         if Status.objects.filter(bazon_status=bazon_status).exists():
@@ -16,3 +20,8 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
             manager = Manager.objects.get(bazon_id=manager_id)
             serialized_data["responsible_user_id"] = manager.amo_id
         self._serialized_data = serialized_data
+
+    def get_serialized_data(self, with_id: bool = True):
+        if with_id:
+            self._serialized_data.pop("id")
+        return super().get_serialized_data()
