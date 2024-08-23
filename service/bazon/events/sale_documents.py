@@ -1,6 +1,3 @@
-from django.core.serializers import serialize
-
-from bazon.models import SaleDocument
 from utils.serializers import BazonSaleToAmoLeadSerializer
 
 
