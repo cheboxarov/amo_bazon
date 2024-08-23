@@ -1,9 +1,17 @@
 <mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:129.0) Gecko/20100101 Firefox/129.0" version="24.7.7">
   <diagram name="Страница — 1" id="yu-_AH9QMJ0rGdUhkcNB">
-    <mxGraphModel>
+    <mxGraphModel dx="1434" dy="734" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="NgoQl6SWxt_nkdX-ty24-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" edge="1" parent="1" source="NgoQl6SWxt_nkdX-ty24-1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="620" y="120" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="NgoQl6SWxt_nkdX-ty24-1" value="&lt;div&gt;service&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="354" y="30" width="120" height="60" as="geometry" />
+        </mxCell>
       </root>
     </mxGraphModel>
   </diagram>
