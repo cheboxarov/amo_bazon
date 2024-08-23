@@ -22,6 +22,6 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
         self._serialized_data = serialized_data
 
     def get_serialized_data(self, with_id: bool = True):
-        if with_id:
+        if not with_id:
             self._serialized_data.pop("id")
         return super().get_serialized_data()

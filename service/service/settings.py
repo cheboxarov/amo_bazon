@@ -146,4 +146,8 @@ CELERY_BEAT_SCHEDULE = {
         "task": "bazon.tasks.contractors_polling",
         "schedule": timedelta(minutes=1),
     },
+    "sync_amo_data": {
+        "task": "amo.tasks.sync_amo_data",
+        "schedule": timedelta(minutes=1)
+    }
 }
