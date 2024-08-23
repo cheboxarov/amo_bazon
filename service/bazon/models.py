@@ -1,5 +1,5 @@
 from django.db import models
-from bazon_api.api import Bazon
+from utils.bazon_api import Bazon
 
 
 class BazonAccount(models.Model):
@@ -62,7 +62,7 @@ class Contractor(models.Model):
     balance_free = models.PositiveIntegerField()
     balance_reserve = models.PositiveIntegerField()
     balance = models.PositiveIntegerField()
-    amo_lead_id = models.PositiveIntegerField(null=True, blank=True)
+    amo_id = models.PositiveIntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.name

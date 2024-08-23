@@ -2,7 +2,7 @@ from celery import shared_task
 from django.forms import model_to_dict
 
 from bazon.models import BazonAccount, SaleDocument, Contractor
-from bazon_api.api import Bazon
+from utils.bazon_api import Bazon
 from .events import on_create_sale_document, on_update_sale_document, on_create_contractor, on_update_contractor
 
 
