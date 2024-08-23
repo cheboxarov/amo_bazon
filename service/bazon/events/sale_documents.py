@@ -10,6 +10,7 @@ def on_create_sale_document(sale_data):
     serialized_data = serializer.get_serialized_data(with_id=False)
     print(f"Created sale document:\n{serialized_data}\n{sale_data}")
 
+
 def on_update_sale_document(sale_data):
     serializer = BazonSaleToAmoLeadSerializer(sale_data)
     serializer.serialize()

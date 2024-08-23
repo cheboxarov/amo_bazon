@@ -148,6 +148,6 @@ CELERY_BEAT_SCHEDULE = {
     },
     "sync_amo_data": {
         "task": "amo.tasks.sync_amo_data",
-        "schedule": timedelta(minutes=1)
-    }
+        "schedule": timedelta(minutes=1),
+    },
 }

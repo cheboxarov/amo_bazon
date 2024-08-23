@@ -257,11 +257,10 @@ class Bazon:
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
-    def get_orders(self, offset: int = 0, limit: int = 500, for_sale_document: str = None):
-        params = {
-            "order": "asc",
-            "limit": limit
-        }
+    def get_orders(
+        self, offset: int = 0, limit: int = 500, for_sale_document: str = None
+    ):
+        params = {"order": "asc", "limit": limit}
         if offset > 0:
             params["offset"] = offset
         if for_sale_document is not None:
@@ -273,10 +272,7 @@ class Bazon:
         return response
 
     def get_contractors(self, offset: int = 0, limit: int = 500):
-        params = {
-            "order": "asc",
-            "limit":limit
-        }
+        params = {"order": "asc", "limit": limit}
         if offset > 0:
             params["offset"] = offset
         url = "https://kontrabaz.baz-on.ru/external-api/v1/getContractors"

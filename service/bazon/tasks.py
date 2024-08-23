@@ -3,7 +3,12 @@ from django.forms import model_to_dict
 
 from bazon.models import BazonAccount, SaleDocument, Contractor
 from utils.bazon_api import Bazon
-from .events import on_create_sale_document, on_update_sale_document, on_create_contractor, on_update_contractor
+from .events import (
+    on_create_sale_document,
+    on_update_sale_document,
+    on_create_contractor,
+    on_update_contractor,
+)
 
 
 @shared_task
@@ -50,9 +55,10 @@ def sale_documents_polling():
                 continue
 
             sale_document = SaleDocument.objects.create(**json_document)
-            on_create_sale_document(json_document) # документ летит в событие
+            on_create_sale_document(json_document)  # документ летит в событие
 
             # Отправка сделки в амо CRM
+
 
 @shared_task
 def contractors_polling():
@@ -91,5 +97,4 @@ def contractors_polling():
                 continue
 
             contractor = Contractor.objects.create(**contractor_json)
-            on_create_contractor(contractor_json) # документ летит в событие
-
+            on_create_contractor(contractor_json)  # документ летит в событие
