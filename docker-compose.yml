@@ -28,6 +28,7 @@ services:
       - POSTGRES_USER=django
       - POSTGRES_PASSWORD=django-QWErty!2
       - POSTGRES_DB=django
+      - POSTGRES_HOST_AUTH_METHOD=trust
 
   nginx:
     image: nginx:1.19.8-alpine

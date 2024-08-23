@@ -49,3 +49,20 @@ class SaleDocument(models.Model):
 
     def __str__(self):
         return f"{self.internal_id} ({self.contractor_name})"
+
+
+class Contractor(models.Model):
+    bazon_account = models.ForeignKey(BazonAccount, on_delete=models.CASCADE)
+    internal_id = models.PositiveIntegerField(unique=True)
+    name = models.CharField(max_length=255)
+    type = models.CharField(max_length=50)
+    phone = models.CharField(max_length=50, null=True, blank=True)
+    email = models.CharField(max_length=50, null=True, blank=True)
+    manager_comment = models.TextField(null=True, blank=True)
+    balance_free = models.PositiveIntegerField()
+    balance_reserve = models.PositiveIntegerField()
+    balance = models.PositiveIntegerField()
+    amo_lead_id = models.PositiveIntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return self.name

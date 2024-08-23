@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "celery",
     "bazon",
-    "amo"
+    "amo",
 ]
 
 MIDDLEWARE = [
@@ -138,12 +138,12 @@ from datetime import timedelta
 
 # Настройки расписания для Celery Beat
 CELERY_BEAT_SCHEDULE = {
-    "get_documents": {
-        "task": "bazon.tasks.update_sale_documents",
+    "sale_documents_polling": {
+        "task": "bazon.tasks.sale_documents_polling",
         "schedule": timedelta(minutes=1),
     },
-    # "get_products": {
-    #     "task": "bazon.tasks.get_products",
-    #     "schedule": timedelta(minutes=1),
-    # },
+    "contractors_polling": {
+        "task": "bazon.tasks.contractors_polling",
+        "schedule": timedelta(minutes=1),
+    },
 }

@@ -1,0 +1,2 @@
+from .sale_documents import on_create_sale_document, on_update_sale_document
+from .contractors import on_create_contractor, on_update_contractor

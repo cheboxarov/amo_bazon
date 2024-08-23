@@ -158,16 +158,16 @@ class Bazon:
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
-    def set_lock_key(self, number: str, prev_lock_key = False, type: str = "sale"):
+    def set_lock_key(self, number: str, prev_lock_key=False, type: str = "sale"):
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
-          "request": {
-            "setDocumentLock": {
-              "type": type,
-              "number": number,
-              "prevLockKey": prev_lock_key
+            "request": {
+                "setDocumentLock": {
+                    "type": type,
+                    "number": number,
+                    "prevLockKey": prev_lock_key,
+                }
             }
-          }
         }
         response = requests.post(url, json=data, headers=self._headers)
         return response
@@ -175,12 +175,9 @@ class Bazon:
     def sale_recreate(self, document_id: int, lock_key: str):
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
-          "request": {
-            "saleRecreate": {
-              "documentID": document_id,
-              "lockKey": lock_key
+            "request": {
+                "saleRecreate": {"documentID": document_id, "lockKey": lock_key}
             }
-          }
         }
         response = requests.post(url, json=data, headers=self._headers)
         return response
@@ -188,12 +185,7 @@ class Bazon:
     def cancel_sale(self, document_id: int, lock_key: str):
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
-            "request": {
-                "saleCancel": {
-                    "documentID": document_id,
-                    "lockKey": lock_key
-                }
-            }
+            "request": {"saleCancel": {"documentID": document_id, "lockKey": lock_key}}
         }
         response = requests.post(url, json=data, headers=self._headers)
         return response
@@ -205,28 +197,14 @@ class Bazon:
                 "getUsers": {
                     "offset": offset,
                     "limit": limit,
-                    "sorter": [
-                        [
-                            "id",
-                            "desc"
-                        ]
-                    ],
+                    "sorter": [["id", "desc"]],
                     "calcFoundRows": True,
                     "filter": [
-                        [
-                            "isSupportUser",
-                            False
-                        ],
-                        [
-                            "roleInCompany",
-                            [
-                                "",
-                                "super"
-                            ]
-                        ]
+                        ["isSupportUser", False],
+                        ["roleInCompany", ["", "super"]],
                     ],
                     "viewMode": "users-ui3",
-                    "_": ""
+                    "_": "",
                 }
             }
         }
@@ -237,35 +215,25 @@ class Bazon:
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
             "request": {
-                "getDocumentFormPrint": {
-                    "id": id,
-                    "printType": print_type,
-                    "_": ""
-                }
+                "getDocumentFormPrint": {"id": id, "printType": print_type, "_": ""}
             }
         }
         response = requests.post(url, json=data, headers=self._headers)
         return response
-
 
     def get_document_items(self, document_number: str, document_type: str = "sale"):
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
             "request": {
                 "getDocumentItems": {
-                    "order": {
-                        "id": "asc"
-                    },
+                    "order": {"id": "asc"},
                     "viewMode": "sale",
                     "where": {
                         "documentNumber": document_number,
                         "documentType": document_type,
-                        "state!=": [
-                            "removed",
-                            "removed_to_other_sale"
-                        ]
+                        "state!=": ["removed", "removed_to_other_sale"],
                     },
-                    "_": ""
+                    "_": "",
                 }
             }
         }
@@ -282,13 +250,35 @@ class Bazon:
                         **data_to_edit,
                     },
                     "documentID": id,
-                    "lockKey": lock_key
+                    "lockKey": lock_key,
                 }
             }
         }
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
+    def get_orders(self, offset: int = 0, limit: int = 500, for_sale_document: str = None):
+        params = {
+            "order": "asc",
+            "limit": limit
+        }
+        if offset > 0:
+            params["offset"] = offset
+        if for_sale_document is not None:
+            params["for_sale_document"] = for_sale_document
 
+        url = "https://kontrabaz.baz-on.ru/external-api/v1/getOrders"
 
+        response = requests.get(url, params=params, headers=self._headers)
+        return response
 
+    def get_contractors(self, offset: int = 0, limit: int = 500):
+        params = {
+            "order": "asc",
+            "limit":limit
+        }
+        if offset > 0:
+            params["offset"] = offset
+        url = "https://kontrabaz.baz-on.ru/external-api/v1/getContractors"
+        response = requests.get(url, params=params, headers=self._headers)
+        return response
