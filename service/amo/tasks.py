@@ -16,13 +16,13 @@ def sync_amo_data():
 
         for pipeline in statuses_data["_embedded"]["pipelines"]:
             for status_data in pipeline["statuses"]:
-                if status_data["id"] in existing_status_ids:
-                    # Обновление существующего статуса
-                    status = Status.objects.get(
-                        amo_id=status_data["id"], amo_account=amo_account
-                    )
-                    status.name = status_data["name"]
-                    status.save()
+                # Используем filter вместо get, чтобы избежать MultipleObjectsReturned
+                status_queryset = Status.objects.filter(
+                    amo_id=status_data["id"], amo_account=amo_account
+                )
+                if status_queryset.exists():
+                    # Обновление всех найденных записей (если их несколько)
+                    status_queryset.update(name=status_data["name"])
                 else:
                     # Добавление нового статуса
                     Status.objects.create(
@@ -47,13 +47,13 @@ def sync_amo_data():
         ).values_list("amo_id", flat=True)
 
         for manager_data in managers_data["_embedded"]["users"]:
-            if manager_data["id"] in existing_manager_ids:
-                # Обновление существующего менеджера
-                manager = Manager.objects.get(
-                    amo_id=manager_data["id"], amo_account=amo_account
-                )
-                manager.name = manager_data["name"]
-                manager.save()
+            # Используем filter вместо get, чтобы избежать MultipleObjectsReturned
+            manager_queryset = Manager.objects.filter(
+                amo_id=manager_data["id"], amo_account=amo_account
+            )
+            if manager_queryset.exists():
+                # Обновление всех найденных записей (если их несколько)
+                manager_queryset.update(name=manager_data["name"])
             else:
                 # Добавление нового менеджера
                 Manager.objects.create(
