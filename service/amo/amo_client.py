@@ -10,7 +10,7 @@ class AmoCRMClient:
     def _get_headers(self):
         return {
             "Authorization": f"Bearer {self.token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
     def get_statuses(self):

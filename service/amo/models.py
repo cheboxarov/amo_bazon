@@ -3,7 +3,7 @@ from django.db import models
 
 class AmoAccount(models.Model):
     suburl = models.CharField(max_length=255)
-    token = models.TextField
+    token = models.TextField()
     bazon_accounts = models.ManyToManyField('bazon.BazonAccount', related_name='amo_accounts')
 
     def __str__(self):
@@ -12,10 +12,10 @@ class AmoAccount(models.Model):
 
 class Status(models.Model):
     BAZON_STATUSES = [
-        ('NEW', 'Новый'),
-        ('WORK', 'В работе'),
-        ('ISSUED', 'Выданные'),
-        ('NOT_IMPLEMENTED', 'Не реализованные'),
+        ('draft', 'Новый'),
+        ('reserve', 'В работе'),
+        ('issued', 'Выданные'),
+        ('canceled', 'Не реализованные'),
     ]
 
     amo_id = models.IntegerField()

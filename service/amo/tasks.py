@@ -15,7 +15,7 @@ def sync_amo_data():
         ).values_list("amo_id", flat=True)
 
         for pipeline in statuses_data["_embedded"]["pipelines"]:
-            for status_data in pipeline["statuses"]:
+            for status_data in pipeline["_embedded"]["statuses"]:
                 # Используем filter вместо get, чтобы избежать MultipleObjectsReturned
                 status_queryset = Status.objects.filter(
                     amo_id=status_data["id"], amo_account=amo_account
@@ -36,7 +36,7 @@ def sync_amo_data():
             amo_id__in=[
                 s["id"]
                 for p in statuses_data["_embedded"]["pipelines"]
-                for s in p["statuses"]
+                for s in p["_embedded"]["statuses"]
             ]
         ).delete()
 

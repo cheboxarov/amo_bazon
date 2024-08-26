@@ -8,9 +8,7 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
         super().__init__(*args, **kwargs)
 
     def serialize(self):
-        serialized_data = {}
-        serialized_data["id"] = self.data.get("internal_id")
-        serialized_data["name"] = self.data.get("number")
+        serialized_data = {"id": self.data.get("internal_id"), "name": f"Сделка с Bazon №{self.data.get('number')}"}
         bazon_status = self.data.get("status")
         if Status.objects.filter(bazon_status=bazon_status).exists():
             status = Status.objects.get(bazon_status=bazon_status)
@@ -25,3 +23,11 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
         if not with_id:
             self._serialized_data.pop("id")
         return super().get_serialized_data()
+
+
+class ContractorToAmoClient(BaseSerializer):
+    def __init(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def serialize(self):
+        pass
