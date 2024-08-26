@@ -2,7 +2,7 @@ from amo.models import Status, Manager
 from .base_serializer import BaseSerializer
 
 
-class AmoContactToBazonContactSerializer(BaseSerializer):
+class AmoLeadToBazonSaleDocument(BaseSerializer):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
