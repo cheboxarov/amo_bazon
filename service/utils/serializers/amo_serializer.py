@@ -10,6 +10,9 @@ class AmoContactToBazonContactSerializer(BaseSerializer):
     def serialize(self):
         serialized_data = {}
         serialized_data["manager_comment"] = self.data.get('name')
+        price = self.data.get("price")
+        if price:
+            serialized_data["sum"] = price
         status_id = self.data.get("status_id")
         if Status.objects.filter(amo_id=status_id).exists():
             status = Status.objects.get(amo_id=status_id)
