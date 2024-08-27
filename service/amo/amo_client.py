@@ -25,26 +25,19 @@ class AmoCRMClient:
         response.raise_for_status()
         return response.json()
 
-    def create_deal(self, name, status_id, responsible_user_id, price=None, custom_fields=None):
+    def create_deal(self, deal_payload: dict, price=None, custom_fields=None):
         """
         Метод для создания сделки в amoCRM.
         """
         url = f"{self.base_url}/leads"
-
-        data = {
-            "name": name,
-            "status_id": status_id,
-            "responsible_user_id": responsible_user_id
-        }
+        data = deal_payload
 
         if price is not None:
             data["price"] = price
 
         if custom_fields is not None:
             data["custom_fields_values"] = custom_fields
-
         response = requests.post(url, headers=self._get_headers(), json=[data])
-
         response.raise_for_status()
         return response.json()
 
