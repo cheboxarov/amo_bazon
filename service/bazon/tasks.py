@@ -51,11 +51,11 @@ def sale_documents_polling():
                         if document_dict[key] != value:
                             setattr(sale_document, key, value)
                     sale_document.save()
-                    on_update_sale_document(json_document)
+                    on_update_sale_document(json_document, bazon_account)
                 continue
 
             sale_document = SaleDocument.objects.create(**json_document)
-            on_create_sale_document(json_document)  # документ летит в событие
+            on_create_sale_document(json_document, bazon_account)  # документ летит в событие
 
             # Отправка сделки в амо CRM
 
@@ -93,8 +93,8 @@ def contractors_polling():
                         if contractor_dict[key] != value:
                             setattr(contractor, key, value)
                     contractor.save()
-                    on_update_contractor(contractor_json)
+                    on_update_contractor(contractor_json, bazon_account)
                 continue
 
             contractor = Contractor.objects.create(**contractor_json)
-            on_create_contractor(contractor_json)  # документ летит в событие
+            on_create_contractor(contractor_json, bazon_account)  # документ летит в событие
