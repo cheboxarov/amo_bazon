@@ -2,26 +2,34 @@ from utils.serializers import BazonSaleToAmoLeadSerializer
 from bazon.models import BazonAccount
 from amo.models import AmoAccount
 from amo.amo_client import AmoCRMClient
+from bazon.models import SaleDocument
 
 
 def on_create_sale_document(sale_data: dict, bazon_account: BazonAccount):
-    try:
-        serializer = BazonSaleToAmoLeadSerializer(sale_data)
-        serializer.serialize()
-        serialized_data = serializer.get_serialized_data(with_id=False)
-        print(serialized_data)
-        amo_account = AmoAccount.objects.filter(bazon_accounts=bazon_account).first()
-        print("Создаю клиент амо срм")
-        amo_client = AmoCRMClient(amo_account.token, amo_account.suburl)
-        print("клиент создан, кидаю запрос")
-        response = amo_client.create_deal(serialized_data)
-        print(f"Created sale document:\n{serialized_data}\n{sale_data}\n")
-    except BaseException as error:
-        print(error)
+    serializer = BazonSaleToAmoLeadSerializer(sale_data)
+    serializer.serialize()
+    serialized_data = serializer.get_serialized_data(with_id=False)
+    query = AmoAccount.objects.filter(bazon_accounts=bazon_account)
+    if not query.exists():
+        return
+    amo_account = query.first()
+    amo_client = AmoCRMClient(amo_account.token, amo_account.suburl)
+    response = amo_client.create_deal(serialized_data)
+    lead_id = response["_embedded"]["leads"][0]["id"]
+    sale_document = SaleDocument.objects.get(internal_id=sale_data["internal_id"])
+    sale_document.amo_lead_id = lead_id
+    sale_document.save()
 
 
 def on_update_sale_document(sale_data: dict, bazon_account: BazonAccount):
     serializer = BazonSaleToAmoLeadSerializer(sale_data)
     serializer.serialize()
     serialized_data = serializer.get_serialized_data(with_id=True)
-    print(f"Updated sale document:\n{serialized_data}\n{sale_data}")
+    query = AmoAccount.objects.filter(bazon_accounts=bazon_account)
+    if not query.exists():
+        return
+    amo_account = query.first()
+    amo_client = AmoCRMClient(amo_account.token, amo_account.suburl)
+    if serialized_data.get("id") is None:
+        return
+    response = amo_client.update_deal(serialized_data)

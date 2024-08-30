@@ -25,15 +25,12 @@ class AmoCRMClient:
         response.raise_for_status()
         return response.json()
 
-    def create_deal(self, deal_payload: dict, price=None, custom_fields=None):
+    def create_deal(self, deal_payload: dict, custom_fields=None):
         """
         Метод для создания сделки в amoCRM.
         """
         url = f"{self.base_url}/leads"
         data = deal_payload
-
-        if price is not None:
-            data["price"] = price
 
         if custom_fields is not None:
             data["custom_fields_values"] = custom_fields
@@ -41,25 +38,13 @@ class AmoCRMClient:
         response.raise_for_status()
         return response.json()
 
-    def update_deal(self, deal_id, name=None, status_id=None, responsible_user_id=None, price=None, custom_fields=None):
+    def update_deal(self, deal_payload: dict, custom_fields=None):
         """
         Метод для обновления сделки в amoCRM.
         """
-        url = f"{self.base_url}/leads/{deal_id}"
+        url = f"{self.base_url}/leads/{deal_payload['id']}"
 
-        data = {}
-
-        if name is not None:
-            data["name"] = name
-
-        if status_id is not None:
-            data["status_id"] = status_id
-
-        if responsible_user_id is not None:
-            data["responsible_user_id"] = responsible_user_id
-
-        if price is not None:
-            data["price"] = price
+        data = deal_payload
 
         if custom_fields is not None:
             data["custom_fields_values"] = custom_fields

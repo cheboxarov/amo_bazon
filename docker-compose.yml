@@ -58,6 +58,8 @@ services:
       - redis
     environment:
       <<: *environment-defaults
+    deploy:
+      replicas: 3
 
   celery_beat:
     build: ./service

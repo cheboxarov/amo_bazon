@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-3h+b$6sc48eg46p$f&y_fo=hlqke^*#y4!((()_(%u!6@fni1!"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
@@ -131,23 +131,22 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 CELERY_BROKER_URL = "redis://redis:6379/0"
 CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/1"
 CELERY_TIMEZONE = "Asia/Krasnoyarsk"  # Установите нужный часовой пояс
 
-from datetime import timedelta
+from celery.schedules import crontab
 
-# Настройки расписания для Celery Beat
 CELERY_BEAT_SCHEDULE = {
     "sale_documents_polling": {
         "task": "bazon.tasks.sale_documents_polling",
-        "schedule": timedelta(minutes=1),
+        "schedule": crontab(minute='*'),  # Каждую минуту
     },
     "contractors_polling": {
         "task": "bazon.tasks.contractors_polling",
-        "schedule": timedelta(minutes=1),
+        "schedule": crontab(minute='*'),  # Каждую минуту
     },
     "sync_amo_data": {
         "task": "amo.tasks.sync_amo_data",
-        "schedule": timedelta(minutes=1),
+        "schedule": crontab(minute='*'),  # Каждую минуту
     },
 }

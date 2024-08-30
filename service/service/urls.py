@@ -17,9 +17,10 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path
-from bazon.views import BazonSaleView
+from bazon.views import BazonSaleView, BazonSaleProductsView
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("bazon-sale/<int:amo_id>", BazonSaleView.as_view())
+    path("bazon-sale/<int:amo_id>", BazonSaleView.as_view()),
+    path("bazon-sale/<int:amo_id>/detail", BazonSaleProductsView.as_view())
 ]

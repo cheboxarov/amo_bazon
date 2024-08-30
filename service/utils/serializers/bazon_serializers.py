@@ -1,5 +1,7 @@
 from .base_serializer import BaseSerializer
 from amo.models import Status, Manager
+from bazon.models import SaleDocument
+from django.db.models import ObjectDoesNotExist
 
 
 class BazonSaleToAmoLeadSerializer(BaseSerializer):
@@ -8,7 +10,18 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
         super().__init__(*args, **kwargs)
 
     def serialize(self):
-        serialized_data = {"id": self.data.get("internal_id"), "name": f"Сделка с Bazon №{self.data.get('number')}"}
+
+        serialized_data = {"name": f"Сделка с Bazon №{self.data.get('number')}"}
+        try:
+            sale_document = SaleDocument.objects.get(internal_id=self.data.get("internal_id"))
+            amo_lead_id = sale_document.amo_lead_id
+            if amo_lead_id:
+                serialized_data["id"] = amo_lead_id
+        except ObjectDoesNotExist:
+            pass
+        sum = self.data.get("sum")
+        if sum:
+            serialized_data["price"] = sum
         bazon_status = self.data.get("status")
         if Status.objects.filter(bazon_status=bazon_status).exists():
             status = Status.objects.get(bazon_status=bazon_status)
@@ -21,7 +34,10 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
 
     def get_serialized_data(self, with_id: bool = True):
         if not with_id:
-            self._serialized_data.pop("id")
+            try:
+                self._serialized_data.pop("id")
+            except KeyError:
+                pass
         return super().get_serialized_data()
 
 
