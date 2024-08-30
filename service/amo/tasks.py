@@ -27,7 +27,7 @@ def sync_amo_data():
                     # Добавление нового статуса
                     Status.objects.create(
                         amo_id=status_data["id"],
-                        name=status_data["name"],
+                        name=f'{status_data["name"]} ({pipeline["name"]})',
                         amo_account=amo_account,
                     )
 

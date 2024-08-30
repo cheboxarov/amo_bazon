@@ -22,7 +22,7 @@ def sale_documents_polling():
             access_token=bazon_account.access_token,
         )
         params = {
-            "limit": 500,
+            "limit": 10,
         }
         response = bazon_api.get_sale_documents(params=params)
         if response.status_code != 200:
@@ -69,8 +69,7 @@ def contractors_polling():
             refresh_token=bazon_account.refresh_token,
             access_token=bazon_account.access_token,
         )
-
-        response = bazon_api.get_contractors()
+        response = bazon_api.get_contractors(limit=10)
         data = response.json()
         for contractor_json in data["response"][0]["result"]["contractors"]:
             contractor_json["internal_id"] = contractor_json.pop("id")
