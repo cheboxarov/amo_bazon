@@ -74,7 +74,7 @@ class BazonItemsListView(APIView):
                           bazon_account.password,
                           bazon_account.refresh_token,
                           bazon_account.access_token)
-        response = bazon_api.get_items()
+        response = bazon_api.get_items(limit=10)
         if response.status_code == 200:
             serializer = ItemsListSerializer(response.json())
             serializer.serialize()
