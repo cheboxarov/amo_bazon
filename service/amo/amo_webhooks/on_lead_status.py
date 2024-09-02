@@ -3,6 +3,7 @@ from django.db.models import ObjectDoesNotExist
 
 
 def on_lead_status_handler(data):
+    print(data)
     lead_id_arr = data.get("leads[status][0][id]", [])
     if len(lead_id_arr) == 0:
         print(lead_id_arr)

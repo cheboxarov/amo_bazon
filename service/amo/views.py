@@ -8,7 +8,6 @@ class AmoWebhookView(APIView):
 
     def post(self, request):
         data = request.data
-        print(data)
         if data.get("leads[status][0][id]") is not None:
             on_lead_status_handler(data)
         if data.get("leads[update][0][id]") is not None:
