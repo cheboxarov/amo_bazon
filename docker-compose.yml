@@ -1,13 +1,14 @@
 version: "3.9"
 
 x-environment-defaults: &environment-defaults
-  DATABASE_URL: "postgresql://django:django-QWErty!2@db:5432/django"
+  DATABASE_URL: "postgresql://django:django@db:5432/django"
   DEBUG: 1
 
 services:
   django:
     build: ./service
-    command: sh -c "gunicorn --bind 0.0.0.0:8000 service.wsgi:application"
+    #command: sh -c "gunicorn --bind 0.0.0.0:8000 service.wsgi:application"
+    command: sh -c "python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./service:/service
       - static_data:/service/static
@@ -26,9 +27,11 @@ services:
       - 5432
     environment:
       - POSTGRES_USER=django
-      - POSTGRES_PASSWORD=django-QWErty!2
+      - POSTGRES_PASSWORD=django
       - POSTGRES_DB=django
       - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "5433:5432"
 
   nginx:
     image: nginx:1.19.8-alpine
@@ -46,6 +49,9 @@ services:
       - 6379
     volumes:
       - redis_data:/data
+    ports:
+      - "6379:6379"
+    command: sh -c "redis-server --appendonly yes"
 
   celery_worker:
     build: ./service
@@ -58,12 +64,10 @@ services:
       - redis
     environment:
       <<: *environment-defaults
-    deploy:
-      replicas: 3
 
   celery_beat:
     build: ./service
-    command: celery -A service beat --loglevel=info
+    command: sh -c "celery -A service purge -f && celery -A service beat --loglevel=info"
     volumes:
       - ./service:/service
       - static_data:/service/static
@@ -72,6 +76,7 @@ services:
       - redis
     environment:
       <<: *environment-defaults
+
 
   flower:
     build: ./service

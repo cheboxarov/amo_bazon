@@ -139,14 +139,14 @@ from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     "sale_documents_polling": {
         "task": "bazon.tasks.sale_documents_polling",
-        "schedule": crontab(minute='*'),  # Каждую минуту
+        "schedule": crontab(minute="*"),  # Каждую минуту
     },
     "contractors_polling": {
         "task": "bazon.tasks.contractors_polling",
-        "schedule": crontab(minute='*'),  # Каждую минуту
+        "schedule": crontab(minute="*"),  # Каждую минуту
     },
     "sync_amo_data": {
         "task": "amo.tasks.sync_amo_data",
-        "schedule": crontab(minute='*'),  # Каждую минуту
+        "schedule": crontab(minute="*"),  # Каждую минуту
     },
 }

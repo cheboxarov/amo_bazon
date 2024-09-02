@@ -31,13 +31,17 @@ class DealClient(AmoCRMClient):
     """
     Класс для работы со сделками в amoCRM.
     """
-    def create_deal(self, name, status_id, responsible_user_id, price=None, custom_fields=None):
+
+    def create_deal(
+        self, name, status_id, responsible_user_id=None, price=None, custom_fields=None
+    ):
         url = f"{self.base_url}/leads"
         data = {
             "name": name,
             "status_id": status_id,
-            "responsible_user_id": responsible_user_id
         }
+        if responsible_user_id is not None:
+            data["responsible_user_id"] = responsible_user_id
         if price is not None:
             data["price"] = price
         if custom_fields is not None:
@@ -47,8 +51,16 @@ class DealClient(AmoCRMClient):
         response.raise_for_status()
         return response.json()
 
-    def update_deal(self, deal_id, name=None, status_id=None, responsible_user_id=None, price=None, custom_fields=None):
-        url = f"{self.base_url}/leads/{deal_id}"
+    def update_deal(
+        self,
+        id,
+        name=None,
+        status_id=None,
+        responsible_user_id=None,
+        price=None,
+        custom_fields=None,
+    ):
+        url = f"{self.base_url}/leads/{id}"
         data = {}
         if name is not None:
             data["name"] = name
@@ -79,12 +91,12 @@ class ContactClient(AmoCRMClient):
     """
     Класс для работы с контактами в amoCRM.
     """
-    def create_contact(self, name, responsible_user_id, custom_fields=None, company_id=None):
+
+    def create_contact(
+        self, name, responsible_user_id, custom_fields=None, company_id=None
+    ):
         url = f"{self.base_url}/contacts"
-        data = {
-            "name": name,
-            "responsible_user_id": responsible_user_id
-        }
+        data = {"name": name, "responsible_user_id": responsible_user_id}
         if custom_fields:
             data["custom_fields_values"] = custom_fields
         if company_id:
@@ -94,7 +106,14 @@ class ContactClient(AmoCRMClient):
         response.raise_for_status()
         return response.json()
 
-    def update_contact(self, contact_id, name=None, responsible_user_id=None, custom_fields=None, company_id=None):
+    def update_contact(
+        self,
+        contact_id,
+        name=None,
+        responsible_user_id=None,
+        custom_fields=None,
+        company_id=None,
+    ):
         url = f"{self.base_url}/contacts/{contact_id}"
         data = {}
         if name:
@@ -124,12 +143,10 @@ class CompanyClient(AmoCRMClient):
     """
     Класс для работы с компаниями в amoCRM.
     """
+
     def create_company(self, name, responsible_user_id, custom_fields=None):
         url = f"{self.base_url}/companies"
-        data = {
-            "name": name,
-            "responsible_user_id": responsible_user_id
-        }
+        data = {"name": name, "responsible_user_id": responsible_user_id}
         if custom_fields:
             data["custom_fields_values"] = custom_fields
 
@@ -137,7 +154,9 @@ class CompanyClient(AmoCRMClient):
         response.raise_for_status()
         return response.json()
 
-    def update_company(self, company_id, name=None, responsible_user_id=None, custom_fields=None):
+    def update_company(
+        self, company_id, name=None, responsible_user_id=None, custom_fields=None
+    ):
         url = f"{self.base_url}/companies/{company_id}"
         data = {}
         if name:

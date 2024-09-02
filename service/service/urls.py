@@ -16,11 +16,18 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path
-from bazon.views import BazonSaleView, BazonSaleProductsView
+from django.urls import path, include
+from bazon.views import BazonSaleView, BazonSaleProductsView, BazonSalesListView
+from amo.views import AmoWebhookView
+
+
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("bazon-sale/<int:amo_id>", BazonSaleView.as_view()),
-    path("bazon-sale/<int:amo_id>/detail", BazonSaleProductsView.as_view())
+    path("amo-bazon/", include([
+        path("admin/", admin.site.urls),
+        path("bazon-sale/<int:amo_id>", BazonSaleView.as_view()),
+        path("bazon-sale/<int:amo_id>/detail", BazonSaleProductsView.as_view()),
+        path("bazon-sales", BazonSalesListView.as_view()),
+        path("amo-webhook", AmoWebhookView.as_view())
+    ]))
 ]

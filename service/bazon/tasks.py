@@ -53,9 +53,13 @@ def sale_documents_polling():
                     sale_document.save()
                     on_update_sale_document(json_document, bazon_account)
                 continue
-
-            sale_document = SaleDocument.objects.create(**json_document)
-            on_create_sale_document(json_document, bazon_account)  # документ летит в событие
+            try:
+                SaleDocument.objects.create(**json_document)
+            except:
+                pass
+            on_create_sale_document(
+                json_document, bazon_account
+            )  # документ летит в событие
 
             # Отправка сделки в амо CRM
 
@@ -96,4 +100,6 @@ def contractors_polling():
                 continue
 
             contractor = Contractor.objects.create(**contractor_json)
-            on_create_contractor(contractor_json, bazon_account)  # документ летит в событие
+            on_create_contractor(
+                contractor_json, bazon_account
+            )  # документ летит в событие

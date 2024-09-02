@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from.models import SaleDocument
+from .models import SaleDocument
 
 
 class BazonSaleDocumentSerializer(ModelSerializer):

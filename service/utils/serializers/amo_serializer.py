@@ -9,7 +9,7 @@ class AmoLeadToBazonSaleDocument(BaseSerializer):
 
     def serialize(self):
         serialized_data = {}
-        serialized_data["manager_comment"] = self.data.get('name')
+        serialized_data["manager_comment"] = self.data.get("name")
         price = self.data.get("price")
         if price:
             serialized_data["sum"] = price

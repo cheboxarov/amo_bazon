@@ -13,7 +13,9 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
 
         serialized_data = {"name": f"Сделка с Bazon №{self.data.get('number')}"}
         try:
-            sale_document = SaleDocument.objects.get(internal_id=self.data.get("internal_id"))
+            sale_document = SaleDocument.objects.get(
+                internal_id=self.data.get("internal_id")
+            )
             amo_lead_id = sale_document.amo_lead_id
             if amo_lead_id:
                 serialized_data["id"] = amo_lead_id
