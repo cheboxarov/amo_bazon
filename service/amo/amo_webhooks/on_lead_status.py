@@ -14,6 +14,7 @@ def on_lead_status_handler(data):
     if len(lead_status_id_arr) == 0:
         return
     lead_status_id = lead_status_id_arr[0]
+    print(lead_status_id)
     try:
         amo_status = Status.objects.get(amo_id=int(lead_status_id))
     except ObjectDoesNotExist:
