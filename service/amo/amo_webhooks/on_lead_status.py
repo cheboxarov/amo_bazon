@@ -9,6 +9,7 @@ def on_lead_status_handler(data):
     if len(lead_id_arr) == 0:
         return
     lead_id = lead_id_arr[0]
+    print(lead_id)
     lead_status_id_arr = data.get("leads[status][0][status_id]", [])
     print(lead_status_id_arr)
     if len(lead_status_id_arr) == 0:
