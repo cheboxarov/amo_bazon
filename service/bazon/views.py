@@ -74,7 +74,30 @@ class BazonItemsListView(APIView):
                           bazon_account.password,
                           bazon_account.refresh_token,
                           bazon_account.access_token)
-        response = bazon_api.get_items(limit=10)
+        response = bazon_api.get_items(limit=250)
+        if response.status_code == 200:
+            serializer = ItemsListSerializer(response.json())
+            serializer.serialize()
+            return Response(serializer.get_serialized_data(), status=HTTP_200_OK)
+        else:
+            response.raise_for_status()
+            return Response(response.json(), status=HTTP_502_BAD_GATEWAY)
+
+    def post(self, request, amo_url):
+        data = request.data
+        search_param = data.get("search_param")
+        if search_param is None:
+            return Response({"Error": "No search_param"}, status=HTTP_400_BAD_REQUEST)
+        try:
+            amo_account = AmoAccount.objects.get(suburl=amo_url)
+        except ObjectDoesNotExist:
+            return Response({"Error": "AmoAccount not found"}, status=HTTP_400_BAD_REQUEST)
+        bazon_account: BazonAccount = amo_account.bazon_accounts.first()
+        bazon_api = Bazon(bazon_account.login,
+                          bazon_account.password,
+                          bazon_account.refresh_token,
+                          bazon_account.access_token)
+        response = bazon_api.get_items(limit=250, search=search_param)
         if response.status_code == 200:
             serializer = ItemsListSerializer(response.json())
             serializer.serialize()

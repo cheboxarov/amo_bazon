@@ -279,7 +279,7 @@ class Bazon:
         response = requests.get(url, params=params, headers=self._headers)
         return response
 
-    def get_items(self, offset: int = 0, limit: int = 250, category_id: int = 1, storages_ids=None, with_reverses: bool = True):
+    def get_items(self, offset: int = 0, limit: int = 250, category_id: int = 1, storages_ids=None, with_reverses: bool = True, search: str = None):
 
         if storages_ids is None:
             storages_ids = [1, 2, 3]
@@ -321,6 +321,9 @@ class Bazon:
                         }
                 }
         }
+
+        if search is not None:
+            data["request"]["getProducts"]["searchByPartNumber"] = search
 
         response = requests.post('https://kontrabaz.baz-on.ru/frontend-api/?getProducts', json=data, headers=self._headers)
         return response
