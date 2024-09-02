@@ -327,3 +327,58 @@ class Bazon:
 
         response = requests.post('https://kontrabaz.baz-on.ru/frontend-api/?getProducts', json=data, headers=self._headers)
         return response
+
+    def add_item_to_document(self, lockKey: str, document_id: int, items: list[dict]):
+
+        """
+        {
+                                        "id":-1,
+                                        "objectID":"3479",
+                                        "objectType":"Product",
+                                        "name":"Топливная рейка с форсунками Subaru Exiga YA5 EJ204 2005 (б/у)",
+                                        "amount":1,
+                                        "price":3000,
+                                        "cost":3000,
+                                        "storageID":"1",
+                                        "state_":"Красноярск",
+                                        "objectUsed":"Контракт",
+                                        "order":0,
+                                        "taxes":
+                                            {
+                                                "paymentSubjectType":"",
+                                                "taxSystemCode":"",
+                                                "taxVatCode":""
+                                            },
+                                        "availableAmount":"1"
+                                    } items
+        """
+
+        data = {
+            "request":
+                {
+                    "saleAddItems":
+                        {
+                            "bufferItems":
+                                items,
+                            "documentID":document_id,
+                            "lockKey":lockKey,
+                            "_":""
+                        }
+                },
+            "meta":
+                {
+                    "tabUID":"2024-09-02-05-15-36-410-034606",
+                    "appVersion":"20240416064347",
+                    "isFreezed":False,
+                    "frontendApiVersion":"3.1",
+                    "requestPrepareTime":
+                        {
+                            "sentAt":"function Date() {\\n    [native code]\\n}",
+                            "startedAt":0.003,
+                            "tokenRefreshedAt":None
+                        }
+                }
+        }
+
+        response = requests.post('https://kontrabaz.baz-on.ru/frontend-api/?saleAddItems', cookies=cookies,
+                                 headers=headers, data=data)
