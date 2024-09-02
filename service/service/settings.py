@@ -31,6 +31,8 @@ DEBUG = False
 
 ALLOWED_HOSTS = ["*"]
 
+CSRF_TRUSTED_ORIGINS = ["https://wlovem.ru", "https://www.wlovem.ru"]
+
 
 # Application definition
 
