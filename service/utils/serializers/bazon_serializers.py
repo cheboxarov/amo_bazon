@@ -44,8 +44,19 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
 
 
 class ContractorToAmoClient(BaseSerializer):
-    def __init(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def serialize(self):
         pass
+
+
+class ItemsListSerializer(BaseSerializer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def serialize(self):
+        serialized_data = []
+        for entity in self.data.get("response", {}).get("getProducts", {}).get("ProductsList", {}).get("entitys", []):
+            serialized_data.append(entity)
+        self._serialized_data = serialized_data

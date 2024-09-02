@@ -1,9 +1,12 @@
+from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework.status import *
 from rest_framework.views import APIView
 from .models import SaleDocument, BazonAccount
 from .serializers import BazonSaleDocumentSerializer
 from utils.bazon_api import Bazon
+from amo.models import AmoAccount
+from utils.serializers.bazon_serializers import ItemsListSerializer
 
 
 class BazonSaleView(APIView):
@@ -58,3 +61,24 @@ class BazonSalesListView(APIView):
         documents = SaleDocument.objects.filter(amo_lead_id__in=lead_ids).all()
         serializer = BazonSaleDocumentSerializer(documents, many=True)
         return Response(serializer.data, status=HTTP_200_OK)
+
+
+class BazonItemsListView(APIView):
+    def get(self, request, amo_url):
+        try:
+            amo_account = AmoAccount.objects.get(suburl=amo_url)
+        except ObjectDoesNotExist:
+            return Response({"Error": "AmoAccount not found"}, status=HTTP_400_BAD_REQUEST)
+        bazon_account: BazonAccount = amo_account.bazon_accounts.first()
+        bazon_api = Bazon(bazon_account.login,
+                          bazon_account.password,
+                          bazon_account.refresh_token,
+                          bazon_account.access_token)
+        response = bazon_api.get_items()
+        if response.status_code == 200:
+            serializer = ItemsListSerializer(response.json())
+            serializer.serialize()
+            return Response(serializer.get_serialized_data(), status=HTTP_200_OK)
+        else:
+            response.raise_for_status()
+            return Response(response.json(), status=HTTP_502_BAD_GATEWAY)

@@ -278,3 +278,49 @@ class Bazon:
         url = "https://kontrabaz.baz-on.ru/external-api/v1/getContractors"
         response = requests.get(url, params=params, headers=self._headers)
         return response
+
+    def get_items(self, offset: int = 0, limit: int = 250, category_id: int = 1, storages_ids=None, with_reverses: bool = True):
+
+        if storages_ids is None:
+            storages_ids = [1, 2, 3]
+        data = {
+            "request":
+                {
+                    "getProducts":
+                        {
+                            "offset":offset,
+                            "limit":limit,
+                            "sorter":
+                                [
+                                    ["id","desc"]
+                                ],
+                            "calcFoundRows":True,
+                            "filter":[],
+                            "categoryID":category_id,
+                            "viewMode":"category-1",
+                            "storagesFilter":
+                                {
+                                    "withReserves":with_reverses,
+                                    "storagesIds":storages_ids,
+                                    "byStoragesRemnants":{}
+                                },
+                            "a11yGridSearchOn":1,"_":""
+                        }
+                },
+            "meta":
+                {
+                    "tabUID":"2024-09-02-05-15-36-410-034606",
+                    "appVersion":"20240416064347",
+                    "isFreezed":False,
+                    "frontendApiVersion":"3.1",
+                    "requestPrepareTime":
+                        {
+                            "sentAt":"function Date() {\\n    [native code]\\n}",
+                            "startedAt":0.038,
+                            "tokenRefreshedAt":None
+                        }
+                }
+        }
+
+        response = requests.post('https://kontrabaz.baz-on.ru/frontend-api/?getProducts', json=data, headers=self._headers)
+        return response
