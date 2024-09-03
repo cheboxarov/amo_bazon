@@ -397,5 +397,52 @@ class Bazon:
             }
         }
 
-        response = requests.post("https://kontrabaz.baz-on.ru/frontend-api/?dropDocumentLock", headers=self._headers, data=data)
+        response = requests.post("https://kontrabaz.baz-on.ru/frontend-api/?dropDocumentLock", headers=self._headers, json=data)
+        return response
+
+    def get_document_items_by_buffer(self, items: list[dict]):
+        """ items
+        [
+            {
+                "objectID":3479,
+                "amount":1,
+                "storageID":"1",
+                "objectType":"Product",
+                "cost":3000,
+                "price":3000,
+                "order":0,
+                "id":"-1"
+            }
+        ],"""
+        data = {
+            "request":
+                {
+                    "getDocumentItemsByBuffer":
+                        {
+                            "bufferItems":
+                                items,
+                            "viewMode":"sale",
+                            "_":""
+                        }
+                },
+            "meta":
+                {
+                    "tabUID":"2024-09-03-03-39-50-654-045684",
+                    "appVersion":"20240416064347",
+                    "isFreezed":False,
+                    "frontendApiVersion":"3.1",
+                    "requestPrepareTime":
+                        {
+                            "sentAt":"function Date() {\\n    [native code]\\n}",
+                            "startedAt":0.003,
+                            "tokenRefreshedAt":None
+                        }
+                }
+        }
+
+        response = requests.post(
+            'https://kontrabaz.baz-on.ru/frontend-api/?getDocumentItemsByBuffer',
+            headers=self._headers,
+            data=data,
+        )
         return response
