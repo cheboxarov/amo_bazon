@@ -446,3 +446,35 @@ class Bazon:
             json=data,
         )
         return response
+
+    def remove_document_items(self, document_id: int, lock_key: str, items: list[int]):
+
+        data = {
+            "request":
+                {
+                    "saleRemoveItems":
+                        {
+                            "itemsIDs":items,
+                            "documentID":document_id,
+                            "lockKey":lock_key,
+                            "_":""
+                        }
+                },
+            "meta":
+                {
+                    "tabUID":"2024-09-03-04-37-29-349-255981",
+                    "appVersion":"20240416064347",
+                    "isFreezed":False,
+                    "frontendApiVersion":"3.1",
+                    "requestPrepareTime":
+                        {
+                            "sentAt":"function Date() {\\n    [native code]\\n}",
+                            "startedAt":0.001,
+                            "tokenRefreshedAt":None
+                        }
+                }
+        }
+
+        response = requests.post('https://kontrabaz.baz-on.ru/frontend-api/?saleRemoveItems',
+                                 headers=self._headers, json=data)
+        return response

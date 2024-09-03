@@ -1,6 +1,5 @@
 import time
-
-from asgiref.timeout import timeout
+from typing import List
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
@@ -101,8 +100,6 @@ class BazonItemsAddView(APIView):
                 return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
         except Exception:
             return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
-        print(amo_url)
-        print(data)
         deal_id = data.get("dealId")
         if deal_id is None:
             return Response({"Error": "Need dealId"}, status=HTTP_400_BAD_REQUEST)
@@ -114,20 +111,18 @@ class BazonItemsAddView(APIView):
             return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)
         sale_document: SaleDocument = query.first()
         bazon_account: BazonAccount = sale_document.bazon_account
-        lock_key = cache.get(sale_document.number)
         bazon_api = Bazon(bazon_account.login,
                           bazon_account.password,
                           bazon_account.refresh_token,
                           bazon_account.access_token)
-        if lock_key is None:
-            hash_token = hashlib.md5()
-            hash_token.update(str(time.time()).encode("utf-8"))
-            token = hash_token.hexdigest()[:16]
-            response = bazon_api.set_lock_key(sale_document.number, token)
-            response.raise_for_status()
-            lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
-            if not isinstance(lock_key, str):
-                return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
+        hash_token = hashlib.md5()
+        hash_token.update(str(time.time()).encode("utf-8"))
+        token = hash_token.hexdigest()[:16]
+        response = bazon_api.set_lock_key(sale_document.number, token)
+        response.raise_for_status()
+        lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
+        if not isinstance(lock_key, str):
+            return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
         print(lock_key)
         items_to_add = []
         for item in items:
@@ -159,3 +154,45 @@ class BazonItemsAddView(APIView):
         response = bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
         cache.delete(sale_document.number)
         return Response({"Result": "Ok"}, status=HTTP_200_OK)
+
+
+class BazonDeleteItemView(APIView):
+
+    def post(self, request, amo_lead_id):
+        data = request.data
+        headers = request.headers
+        try:
+            amo_url = headers.get("Origin", "").split("//")[-1].split(".")[0]
+            if amo_url is None:
+                return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
+        deal_id = data.get("dealId")
+        if deal_id is None:
+            return Response({"Error": "Need dealId"}, status=HTTP_400_BAD_REQUEST)
+        items: list[int] = data.get("items")
+        if not isinstance(items, list):
+            return Response({"Error": "Array of items expected"}, status=HTTP_400_BAD_REQUEST)
+        query = SaleDocument.objects.filter(amo_lead_id=deal_id)
+        if not query.exists():
+            return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)
+        sale_document: SaleDocument = query.first()
+        bazon_account: BazonAccount = sale_document.bazon_account
+        bazon_api = Bazon(bazon_account.login,
+                          bazon_account.password,
+                          bazon_account.refresh_token,
+                          bazon_account.access_token)
+        hash_token = hashlib.md5()
+        hash_token.update(str(time.time()).encode("utf-8"))
+        token = hash_token.hexdigest()[:16]
+        response = bazon_api.set_lock_key(sale_document.number, token)
+        response.raise_for_status()
+        lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
+        if not isinstance(lock_key, str):
+            return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
+        print(lock_key)
+        response = bazon_api.remove_document_items(sale_document.internal_id, lock_key=lock_key, items=items)
+        bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
+        print(response)
+        return Response({"Result": "ok"}, status=HTTP_200_OK)
+
