@@ -75,7 +75,7 @@ class BazonItemsListView(APIView):
         storage_id = self.request.query_params.get("storage_id")
         if storage_id is None:
             return Response({"Error": "Need storage id"}, status=HTTP_400_BAD_REQUEST)
-        response = bazon_api.get_items(limit=250, search=search, storages_ids=[int(storage_id)])
+        response = bazon_api.get_items(limit=5000, search=search, storages_ids=[int(storage_id)])
         if response.status_code == 200:
             serializer = ItemsListSerializer(response.json())
             serializer.serialize()
