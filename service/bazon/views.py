@@ -108,7 +108,7 @@ class BazonItemsAddView(APIView):
         items = data.get("items")
         if not isinstance(items, list):
             return Response({"Error": "Array of items expected"}, status=HTTP_400_BAD_REQUEST)
-        query = SaleDocument.objects.filter(amo_id=deal_id)
+        query = SaleDocument.objects.filter(amo_lead_id=deal_id)
         if not query.exists():
             return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)
         sale_document = query.first()
