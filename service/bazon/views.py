@@ -140,7 +140,9 @@ class BazonItemsAddView(APIView):
             if amount is None:
                 continue
             items_to_add.append({
+                "id": -1,
                 "objectId": item.get("productId"),
+                "objectType": "Product",
                 "amount": amount
             })
         response = bazon_api.add_item_to_document(lock_key, document_id=sale_document.internal_id, items=items_to_add)
