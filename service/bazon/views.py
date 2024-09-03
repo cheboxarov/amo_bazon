@@ -147,7 +147,8 @@ class BazonItemsAddView(APIView):
         try:
             response.raise_for_status()
         except Exception as error:
-            print(error)
+            print(response)
+            print(response.json())
             return Response({"Error": "Cant add items"}, status=HTTP_500_INTERNAL_SERVER_ERROR)
         print(response.json())
         response = bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
