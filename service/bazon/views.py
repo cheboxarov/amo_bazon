@@ -128,6 +128,8 @@ class BazonItemsAddView(APIView):
             response.raise_for_status()
             lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
             if not isinstance(lock_key, str):
+                response = bazon_api.drop_lock_key(sale_document.internal_id, "")
+                print(response)
                 return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
             cache.set(sale_document.number, lock_key, timeout=30)
         print(lock_key)
