@@ -204,5 +204,5 @@ class BazonDealOrdersView(APIView):
         bazon_api = bazon_account.get_api()
         response = bazon_api.get_orders(for_sale_document=sale_document.number)
         if response.status_code == 200:
-            return Response(response.json(), status=HTTP_200_OK)
+            return Response(response.json().get("response",[{}])[0].get("result", {}).get("orders",[]), status=HTTP_200_OK)
         return Response({"Result": "Ok"}, status=HTTP_200_OK)
