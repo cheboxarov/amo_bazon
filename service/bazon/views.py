@@ -124,7 +124,7 @@ class BazonItemsAddView(APIView):
             hash_token.update(str(time.time()).encode("utf-8"))
             token = hash_token.hexdigest()[:16]
             response = bazon_api.set_lock_key(sale_document.number, token)
-            print(response.status_code)
+            print(response.json())
             response.raise_for_status()
             lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
             if not isinstance(lock_key, str):
