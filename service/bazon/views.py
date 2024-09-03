@@ -1,6 +1,7 @@
 import time
 
-from celery.bin.control import status
+from asgiref.timeout import timeout
+from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework.status import *
@@ -113,17 +114,20 @@ class BazonItemsAddView(APIView):
             return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)
         sale_document: SaleDocument = query.first()
         bazon_account: BazonAccount = sale_document.bazon_account
-        bazon_api = Bazon(bazon_account.login,
-                          bazon_account.password,
-                          bazon_account.refresh_token,
-                          bazon_account.access_token)
-        hash_token = hashlib.md5()
-        hash_token.update(str(time.time()).encode("utf-8"))
-        token = hash_token.hexdigest()[:16]
-        response = bazon_api.set_lock_key(sale_document.number, token)
-        print(response.status_code)
-        response.raise_for_status()
-        lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
+        lock_key = cache.get(sale_document.number)
+        if lock_key is None:
+            bazon_api = Bazon(bazon_account.login,
+                              bazon_account.password,
+                              bazon_account.refresh_token,
+                              bazon_account.access_token)
+            hash_token = hashlib.md5()
+            hash_token.update(str(time.time()).encode("utf-8"))
+            token = hash_token.hexdigest()[:16]
+            response = bazon_api.set_lock_key(sale_document.number, token)
+            print(response.status_code)
+            response.raise_for_status()
+            lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
+            cache.set(sale_document.number, lock_key, timeout=10)
         print(lock_key)
         if not isinstance(lock_key, str):
             return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
