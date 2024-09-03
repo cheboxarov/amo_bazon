@@ -170,8 +170,8 @@ class BazonDeleteItemView(APIView):
         deal_id = data.get("dealId")
         if deal_id is None:
             return Response({"Error": "Need dealId"}, status=HTTP_400_BAD_REQUEST)
-        items: list[int] = data.get("items")
-        if not isinstance(items, list):
+        item: int = data.get("itemId")
+        if not isinstance(item, int):
             return Response({"Error": "Array of items expected"}, status=HTTP_400_BAD_REQUEST)
         query = SaleDocument.objects.filter(amo_lead_id=deal_id)
         if not query.exists():
@@ -191,7 +191,7 @@ class BazonDeleteItemView(APIView):
         if not isinstance(lock_key, str):
             return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
         print(lock_key)
-        response = bazon_api.remove_document_items(sale_document.internal_id, lock_key=lock_key, items=items)
+        response = bazon_api.remove_document_items(sale_document.internal_id, lock_key=lock_key, items=[item])
         bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
         print(response)
         return Response({"Result": "ok"}, status=HTTP_200_OK)
