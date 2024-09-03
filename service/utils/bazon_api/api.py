@@ -443,6 +443,6 @@ class Bazon:
         response = requests.post(
             'https://kontrabaz.baz-on.ru/frontend-api/?getDocumentItemsByBuffer',
             headers=self._headers,
-            data=data,
+            json=data,
         )
         return response
