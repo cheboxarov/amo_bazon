@@ -139,14 +139,16 @@ class BazonItemsAddView(APIView):
                 "storageID": 1,
                 "id": "-1"
             })
-        print(items_to_add)
-        response = bazon_api.get_document_items_by_buffer(items_to_add)
-        print(response)
-        try:
-            print(response.json())
-        except:
-            pass
-        response = bazon_api.add_item_to_document(lock_key, document_id=sale_document.internal_id, items=items_to_add)
+            item_to_add = [
+                {
+                    "objectID": item.get("productId"),
+                    "objectType": "Product",
+                    "amount": amount,
+                    "storageID": 1,
+                    "id": "-1"
+                }
+            ]
+            response = bazon_api.add_item_to_document(lock_key, document_id=sale_document.internal_id, items=item_to_add)
         try:
             response.raise_for_status()
         except Exception as error:
