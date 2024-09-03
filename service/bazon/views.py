@@ -139,6 +139,7 @@ class BazonItemsAddView(APIView):
                 "storageID": 1,
                 "id": "-1"
             })
+        print(items_to_add)
         response = bazon_api.get_document_items_by_buffer(items_to_add)
         print(response)
         try:
