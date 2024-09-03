@@ -1,10 +1,11 @@
 import time
-from typing import List
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework.status import *
 from rest_framework.views import APIView
+from sqlparse.utils import consume
+
 from .models import SaleDocument, BazonAccount
 from .serializers import BazonSaleDocumentSerializer
 from utils.bazon_api import Bazon
@@ -79,7 +80,10 @@ class BazonItemsListView(APIView):
                           bazon_account.refresh_token,
                           bazon_account.access_token)
         search = self.request.query_params.get("search")
-        response = bazon_api.get_items(limit=250, search=search)
+        storage_id = self.request.query_params.get("storage_id")
+        if storage_id is None:
+            return Response({"Error": "Need storage id"}, status=HTTP_400_BAD_REQUEST)
+        response = bazon_api.get_items(limit=250, search=search, storages_ids=[int(storage_id)])
         if response.status_code == 200:
             serializer = ItemsListSerializer(response.json())
             serializer.serialize()
@@ -126,6 +130,9 @@ class BazonItemsAddView(APIView):
         print(lock_key)
         items_to_add = []
         for item in items:
+            storage_id = item.get("storageId")
+            if storage_id is None:
+                continue
             product_id = item.get("productId")
             if product_id is None:
                 continue
@@ -136,7 +143,7 @@ class BazonItemsAddView(APIView):
                 "objectID": item.get("productId"),
                 "objectType": "Product",
                 "amount": amount,
-                "storageID": 1,
+                "storageID": storage_id,
                 "id": "-1"
             })
             item_to_add = [
@@ -144,7 +151,7 @@ class BazonItemsAddView(APIView):
                     "objectID": item.get("productId"),
                     "objectType": "Product",
                     "amount": amount,
-                    "storageID": 1,
+                    "storageID": storage_id,
                     "id": "-1"
                 }
             ]
