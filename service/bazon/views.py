@@ -124,12 +124,9 @@ class BazonItemsAddView(APIView):
             hash_token.update(str(time.time()).encode("utf-8"))
             token = hash_token.hexdigest()[:16]
             response = bazon_api.set_lock_key(sale_document.number, token)
-            print(response.json())
             response.raise_for_status()
             lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
             if not isinstance(lock_key, str):
-                response = bazon_api.drop_lock_key(sale_document.internal_id, "")
-                print(response.json())
                 return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
             cache.set(sale_document.number, lock_key, timeout=30)
         print(lock_key)
@@ -149,18 +146,12 @@ class BazonItemsAddView(APIView):
             })
         response = bazon_api.get_document_items_by_buffer(items_to_add)
         print(response)
-        print(response.json())
         response = bazon_api.add_item_to_document(lock_key, document_id=sale_document.internal_id, items=items_to_add)
         try:
             response.raise_for_status()
         except Exception as error:
-            print(error)
-            print(response)
-            print(response.json())
+            response = bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
             return Response({"Error": "Cant add items"}, status=HTTP_500_INTERNAL_SERVER_ERROR)
-        print(response.json())
         response = bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
         cache.delete(sale_document.number)
-        print(response)
-        print(response.json())
         return Response({"Result": "Ok"}, status=HTTP_200_OK)
