@@ -89,6 +89,6 @@ class BazonItemsAddView(APIView):
 
     def post(self, request, amo_lead_id):
         data = request.data
-        headers = self.headers
+        headers = request.headers
         print(headers)
         return Response({"Result": "Ok"}, status=HTTP_200_OK)
