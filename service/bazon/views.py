@@ -123,5 +123,8 @@ class BazonItemsAddView(APIView):
         response = bazon_api.set_lock_key(sale_document.number, token)
         print(response.status_code)
         response.raise_for_status()
-        print(response.json())
+        lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
+        print(lock_key)
+        if not isinstance(lock_key, str):
+            return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
         return Response({"Result": "Ok"}, status=HTTP_200_OK)
