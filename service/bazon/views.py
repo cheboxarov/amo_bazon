@@ -115,11 +115,11 @@ class BazonItemsAddView(APIView):
         sale_document: SaleDocument = query.first()
         bazon_account: BazonAccount = sale_document.bazon_account
         lock_key = cache.get(sale_document.number)
+        bazon_api = Bazon(bazon_account.login,
+                          bazon_account.password,
+                          bazon_account.refresh_token,
+                          bazon_account.access_token)
         if lock_key is None:
-            bazon_api = Bazon(bazon_account.login,
-                              bazon_account.password,
-                              bazon_account.refresh_token,
-                              bazon_account.access_token)
             hash_token = hashlib.md5()
             hash_token.update(str(time.time()).encode("utf-8"))
             token = hash_token.hexdigest()[:16]
@@ -131,4 +131,19 @@ class BazonItemsAddView(APIView):
                 return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
             cache.set(sale_document.number, lock_key, timeout=30)
         print(lock_key)
+        items_to_add = []
+        for item in items:
+            product_id = item.get("productId")
+            if product_id is None:
+                continue
+            amount = item.get("quantity")
+            if amount is None:
+                continue
+            items_to_add.append({
+                "objectId": item.get("productId"),
+                "amount": amount
+            })
+        response = bazon_api.add_item_to_document(lock_key, document_id=sale_document.internal_id, items=items_to_add)
+        response.raise_for_status()
+        print(response.json())
         return Response({"Result": "Ok"}, status=HTTP_200_OK)

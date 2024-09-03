@@ -380,5 +380,6 @@ class Bazon:
                 }
         }
 
-        response = requests.post('https://kontrabaz.baz-on.ru/frontend-api/?saleAddItems', cookies=cookies,
-                                 headers=headers, data=data)
+        response = requests.post('https://kontrabaz.baz-on.ru/frontend-api/?saleAddItems',
+                                 headers=self._headers, data=data)
+        return response
