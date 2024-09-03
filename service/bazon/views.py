@@ -1,3 +1,5 @@
+import time
+
 from celery.bin.control import status
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
@@ -8,6 +10,7 @@ from .serializers import BazonSaleDocumentSerializer
 from utils.bazon_api import Bazon
 from amo.models import AmoAccount
 from utils.serializers.bazon_serializers import ItemsListSerializer
+import hashlib
 
 
 class BazonSaleView(APIView):
@@ -99,4 +102,22 @@ class BazonItemsAddView(APIView):
             return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
         print(amo_url)
         print(data)
+        deal_id = data.get("dealId")
+        if deal_id is None:
+            return Response({"Error": "Need dealId"}, status=HTTP_400_BAD_REQUEST)
+        items = data.get("items")
+        if not isinstance(items, list):
+            return Response({"Error": "Array of items expected"}, status=HTTP_400_BAD_REQUEST)
+        query = SaleDocument.objects.filter(amo_id=deal_id)
+        if not query.exists():
+            return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)
+        sale_document = query.first()
+        bazon_account: BazonAccount = sale_document.bazon_account
+        bazon_api = Bazon(bazon_account.login,
+                          bazon_account.password,
+                          bazon_account.refresh_token,
+                          bazon_account.access_token)
+        hash_token = hashlib.sha256()
+        hash_token.update(str(time.time()).encode("utf-8"))
+        print(hash_token.hexdigest())
         return Response({"Result": "Ok"}, status=HTTP_200_OK)
