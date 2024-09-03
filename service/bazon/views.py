@@ -83,3 +83,12 @@ class BazonItemsListView(APIView):
         else:
             response.raise_for_status()
             return Response(response.json(), status=HTTP_502_BAD_GATEWAY)
+
+
+class BazonItemsAddView(APIView):
+
+    def post(self, request, amo_lead_id):
+        data = request.data
+        headers = self.headers
+        print(headers)
+        return Response({"Result": "Ok"}, status=HTTP_200_OK)
