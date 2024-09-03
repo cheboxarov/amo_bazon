@@ -31,12 +31,7 @@ class BazonSaleProductsView(APIView):
             return Response({"Error": "Not found"}, status=HTTP_404_NOT_FOUND)
         sale_document: SaleDocument = queryset.first()
         bazon_account: BazonAccount = sale_document.bazon_account
-        bazon_api = Bazon(
-            bazon_account.login,
-            bazon_account.password,
-            bazon_account.refresh_token,
-            bazon_account.access_token,
-        )
+        bazon_api = bazon_account.get_api()
         response = bazon_api.get_detail_document(int(sale_document.number))
         if response.status_code == 200:
             data = response.json()
@@ -75,10 +70,7 @@ class BazonItemsListView(APIView):
         except ObjectDoesNotExist:
             return Response({"Error": "AmoAccount not found"}, status=HTTP_400_BAD_REQUEST)
         bazon_account: BazonAccount = amo_account.bazon_accounts.first()
-        bazon_api = Bazon(bazon_account.login,
-                          bazon_account.password,
-                          bazon_account.refresh_token,
-                          bazon_account.access_token)
+        bazon_api = bazon_account.get_api()
         search = self.request.query_params.get("search")
         storage_id = self.request.query_params.get("storage_id")
         if storage_id is None:
@@ -115,10 +107,7 @@ class BazonItemsAddView(APIView):
             return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)
         sale_document: SaleDocument = query.first()
         bazon_account: BazonAccount = sale_document.bazon_account
-        bazon_api = Bazon(bazon_account.login,
-                          bazon_account.password,
-                          bazon_account.refresh_token,
-                          bazon_account.access_token)
+        bazon_api = bazon_account.get_api()
         hash_token = hashlib.md5()
         hash_token.update(str(time.time()).encode("utf-8"))
         token = hash_token.hexdigest()[:16]
@@ -159,9 +148,9 @@ class BazonItemsAddView(APIView):
         try:
             response.raise_for_status()
         except Exception as error:
-            response = bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
+            bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
             return Response({"Error": "Cant add items"}, status=HTTP_500_INTERNAL_SERVER_ERROR)
-        response = bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
+        bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
         cache.delete(sale_document.number)
         return Response({"Result": "Ok"}, status=HTTP_200_OK)
 
@@ -188,10 +177,7 @@ class BazonDeleteItemView(APIView):
             return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)
         sale_document: SaleDocument = query.first()
         bazon_account: BazonAccount = sale_document.bazon_account
-        bazon_api = Bazon(bazon_account.login,
-                          bazon_account.password,
-                          bazon_account.refresh_token,
-                          bazon_account.access_token)
+        bazon_api = bazon_account.get_api()
         hash_token = hashlib.md5()
         hash_token.update(str(time.time()).encode("utf-8"))
         token = hash_token.hexdigest()[:16]
@@ -206,3 +192,17 @@ class BazonDeleteItemView(APIView):
         print(response)
         return Response({"Result": "ok"}, status=HTTP_200_OK)
 
+
+class BazonDealOrdersView(APIView):
+
+    def get(self, request, amo_lead_id):
+        document_query = SaleDocument.objects.filter(amo_lead_id=amo_lead_id)
+        if not document_query.exists():
+            return Response({"Error": "Document not exists"}, status=HTTP_404_NOT_FOUND)
+        sale_document: SaleDocument = document_query.first()
+        bazon_account: BazonAccount = sale_document.bazon_account
+        bazon_api = bazon_account.get_api()
+        response = bazon_api.get_orders(for_sale_document=sale_document.number)
+        if response.status_code == 200:
+            return Response(response.json(), status=HTTP_200_OK)
+        return Response({"Result": "Ok"}, status=HTTP_200_OK)

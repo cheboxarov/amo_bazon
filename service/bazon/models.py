@@ -9,6 +9,15 @@ class BazonAccount(models.Model):
     refresh_token = models.TextField(null=True, blank=True)
     access_token = models.TextField(null=True, blank=True)
 
+    def get_api(self) -> Bazon:
+        if self.access_token is None or self.refresh_token is None:
+            return None
+        bazon = Bazon(self.login,
+                      self.password,
+                      self.refresh_token,
+                      self.access_token)
+        return bazon
+
     def auth(self):
         bazon = Bazon(login=self.login, password=self.password)
         self.refresh_token = bazon.get_refresh_token()
