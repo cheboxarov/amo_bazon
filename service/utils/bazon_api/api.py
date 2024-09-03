@@ -3,6 +3,8 @@ import json
 import requests
 from typing import Collection
 
+from kombu.pools import reset
+
 
 class Bazon:
 
@@ -381,5 +383,19 @@ class Bazon:
         }
 
         response = requests.post('https://kontrabaz.baz-on.ru/frontend-api/?saleAddItems',
-                                 headers=self._headers, data=data)
+                                 headers=self._headers, json=data)
+        return response
+
+    def drop_lock_key(self, document_id: id, lock_key: str):
+        data = {
+            "request": {
+                "dropDocumentLock": {
+                    "documentID": document_id,
+                    "lockKey": lock_key,
+                    "_": ""
+                }
+            }
+        }
+
+        response = requests.post("https://kontrabaz.baz-on.ru/frontend-api/?dropDocumentLock", headers=self._headers, data=data)
         return response
