@@ -117,7 +117,7 @@ class BazonItemsAddView(APIView):
                           bazon_account.password,
                           bazon_account.refresh_token,
                           bazon_account.access_token)
-        hash_token = hashlib.sha256()
+        hash_token = hashlib.md5()
         hash_token.update(str(time.time()).encode("utf-8"))
         print(hash_token.hexdigest())
         return Response({"Result": "Ok"}, status=HTTP_200_OK)
