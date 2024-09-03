@@ -138,10 +138,11 @@ class BazonItemsAddView(APIView):
             if amount is None:
                 continue
             items_to_add.append({
-                "id": -1,
-                "objectId": item.get("productId"),
+                "objectID": item.get("productId"),
                 "objectType": "Product",
-                "amount": amount
+                "amount": amount,
+                "storageID": 1,
+                "id": "-1"
             })
         response = bazon_api.get_document_items_by_buffer(items_to_add)
         print(response)
