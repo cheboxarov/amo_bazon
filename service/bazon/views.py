@@ -1,3 +1,4 @@
+from celery.bin.control import status
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework.status import *
@@ -90,5 +91,12 @@ class BazonItemsAddView(APIView):
     def post(self, request, amo_lead_id):
         data = request.data
         headers = request.headers
-        print(headers)
+        try:
+            amo_url = headers.get("Origin", "").split("//")[-1].split(".")[0]
+            if amo_url is None:
+                return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
+        except Exception:
+            return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
+        print(amo_url)
+        print(data)
         return Response({"Result": "Ok"}, status=HTTP_200_OK)
