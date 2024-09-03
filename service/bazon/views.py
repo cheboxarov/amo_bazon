@@ -111,7 +111,7 @@ class BazonItemsAddView(APIView):
         query = SaleDocument.objects.filter(amo_lead_id=deal_id)
         if not query.exists():
             return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)
-        sale_document = query.first()
+        sale_document: SaleDocument = query.first()
         bazon_account: BazonAccount = sale_document.bazon_account
         bazon_api = Bazon(bazon_account.login,
                           bazon_account.password,
@@ -119,5 +119,9 @@ class BazonItemsAddView(APIView):
                           bazon_account.access_token)
         hash_token = hashlib.md5()
         hash_token.update(str(time.time()).encode("utf-8"))
-        print(hash_token.hexdigest())
+        token = hash_token.hexdigest()[:16]
+        response = bazon_api.set_lock_key(sale_document.number, token)
+        print(response.status_code)
+        response.raise_for_status()
+        print(response.json())
         return Response({"Result": "Ok"}, status=HTTP_200_OK)
