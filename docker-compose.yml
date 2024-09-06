@@ -1,5 +1,6 @@
 version: "3.9"
 
+
 x-environment-defaults: &environment-defaults
   DATABASE_URL: "postgresql://django:django@db:5432/django"
   DEBUG: 1
