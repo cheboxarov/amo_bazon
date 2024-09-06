@@ -54,6 +54,7 @@ services:
     command: sh -c "redis-server --appendonly yes"
 
   celery_worker:
+    restart: always
     build: ./service
     command: celery -A service worker --loglevel=info
     volumes:
