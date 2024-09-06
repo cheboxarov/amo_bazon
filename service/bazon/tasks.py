@@ -22,7 +22,7 @@ def sale_documents_polling():
             access_token=bazon_account.access_token,
         )
         params = {
-            "limit": 10,
+            "limit": 250,
         }
         response = bazon_api.get_sale_documents(params=params)
         if response.status_code != 200:
