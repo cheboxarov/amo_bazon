@@ -28,8 +28,8 @@ def sale_documents_polling():
         if response.status_code != 200:
             bazon_account.refresh_auth()
             return
-        data = response.json()
         for amo_account in bazon_account.amo_accounts.all():
+            data = response.json()
             for json_document in data["response"][0]["result"]["sale_documents"]:
                 try:
                     json_document["internal_id"] = json_document.pop("id")
