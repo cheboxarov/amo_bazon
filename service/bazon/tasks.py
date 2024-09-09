@@ -50,6 +50,7 @@ def sale_documents_polling():
                     document_dict.pop("id")
                     document_dict.pop("bazon_account")
                     document_dict.pop("amo_lead_id")
+                    document_dict.pop("amo_account")
                     json_document.pop("bazon_account")
                     if document_dict != json_document:
                         # Если сделка с апи отличается от той что в бд - актуализируем ее

@@ -19,6 +19,7 @@ def on_create_sale_document(sale_data: dict, amo_account: AmoAccount,):
 
 
 def on_update_sale_document(sale_data: dict, amo_account: AmoAccount):
+    print(f"Deal updated: {sale_data}")
     serializer = BazonSaleToAmoLeadSerializer(amo_account, sale_data)
     serializer.serialize()
     serialized_data = serializer.get_serialized_data(with_id=True)
