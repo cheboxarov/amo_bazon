@@ -9,8 +9,6 @@ def on_create_sale_document(sale_data: dict, amo_account: AmoAccount,):
     serializer = BazonSaleToAmoLeadSerializer(sale_data)
     serializer.serialize()
     serialized_data = serializer.get_serialized_data(with_id=False)
-    if not query.exists():
-        return
     amo_client = DealClient(amo_account.token, amo_account.suburl)
     response = amo_client.create_deal(**serialized_data)
     lead_id = response["_embedded"]["leads"][0]["id"]
