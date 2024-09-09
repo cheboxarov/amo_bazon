@@ -1,4 +1,6 @@
+import hashlib
 import json
+import time
 
 import requests
 from typing import Collection
@@ -478,3 +480,20 @@ class Bazon:
         response = requests.post('https://kontrabaz.baz-on.ru/frontend-api/?saleRemoveItems',
                                  headers=self._headers, json=data)
         return response
+
+    def sale_reserve(self, document_id: int, lock_key: str):
+        data = {
+            "request": {
+                "saleReserve": {
+                    "documentID": document_id,
+                    "lockKey": lock_key,
+                }
+            }
+        }
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?saleReserve", headers=self._headers, json=data)
+
+    def generate_lock_key(self, document_number: str):
+        response = self.set_lock_key(document_number)
+        response.raise_for_status()
+        lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
+        return lock_key

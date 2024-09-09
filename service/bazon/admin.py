@@ -1,8 +1,12 @@
 from django.contrib import admin
 from .models import BazonAccount, SaleDocument, Contractor
 
-
-# Register your models here.
 admin.site.register(BazonAccount)
-admin.site.register(SaleDocument)
+
+
+@admin.register(SaleDocument)
+class SaleDocumentAdmin(admin.ModelAdmin):
+    list_display = ('internal_id', 'amo_account', "bazon_account", "status", "amo_lead_id")
+
+
 admin.site.register(Contractor)
