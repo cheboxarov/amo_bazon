@@ -60,7 +60,7 @@ def sale_documents_polling():
                         on_update_sale_document(json_document, amo_account)
                     continue
                 try:
-                    SaleDocument.objects.create(**json_document)
+                    SaleDocument.objects.create(**json_document, amo_account=amo_account)
                 except:
                     pass
                 on_create_sale_document(
