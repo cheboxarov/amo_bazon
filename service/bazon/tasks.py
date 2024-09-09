@@ -31,7 +31,11 @@ def sale_documents_polling():
         data = response.json()
         for amo_account in bazon_account.amo_accounts.all():
             for json_document in data["response"][0]["result"]["sale_documents"]:
-                json_document["internal_id"] = json_document.pop("id")
+                try:
+                    json_document["internal_id"] = json_document.pop("id")
+                except Exception as e:
+                    print(json_document)
+                    continue
                 json_document["bazon_account"] = bazon_account
                 if SaleDocument.objects.filter(
                     internal_id=json_document["internal_id"],
