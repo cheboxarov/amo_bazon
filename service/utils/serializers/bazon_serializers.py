@@ -2,11 +2,13 @@ from .base_serializer import BaseSerializer
 from amo.models import Status, Manager
 from bazon.models import SaleDocument
 from django.db.models import ObjectDoesNotExist
+from amo.models import AmoAccount
 
 
 class BazonSaleToAmoLeadSerializer(BaseSerializer):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, amo_account: AmoAccount, *args, **kwargs):
+        self.amo_account = amo_account
         super().__init__(*args, **kwargs)
 
     def serialize(self):
@@ -14,7 +16,8 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
         serialized_data = {"name": f"Сделка с Bazon №{self.data.get('number')}"}
         try:
             sale_document = SaleDocument.objects.get(
-                internal_id=self.data.get("internal_id")
+                internal_id=self.data.get("internal_id"),
+                amo_account=self.amo_account
             )
             amo_lead_id = sale_document.amo_lead_id
             if amo_lead_id:
@@ -26,10 +29,10 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
             serialized_data["price"] = sum
         bazon_status = self.data.get("status")
         if Status.objects.filter(bazon_status=bazon_status).exists():
-            status = Status.objects.get(bazon_status=bazon_status)
+            status = Status.objects.get(bazon_status=bazon_status, amo_account=self.amo_account)
             serialized_data["status_id"] = status.amo_id
         manager_id = self.data.get("manager_id")
-        if Manager.objects.filter(bazon_id=manager_id).exists():
+        if Manager.objects.filter(bazon_id=manager_id, amo_account=self.amo_account).exists():
             manager = Manager.objects.get(bazon_id=manager_id)
             serialized_data["responsible_user_id"] = manager.amo_id
         self._serialized_data = serialized_data
