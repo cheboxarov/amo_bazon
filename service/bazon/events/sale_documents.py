@@ -12,7 +12,7 @@ def on_create_sale_document(sale_data: dict, amo_account: AmoAccount,):
     amo_client = DealClient(amo_account.token, amo_account.suburl)
     response = amo_client.create_deal(**serialized_data)
     lead_id = response["_embedded"]["leads"][0]["id"]
-    sale_document = SaleDocument.objects.get(internal_id=sale_data["internal_id"])
+    sale_document = SaleDocument.objects.get(internal_id=sale_data["internal_id"], amo_account=amo_account)
     sale_document.amo_lead_id = lead_id
     sale_document.amo_account = amo_account
     sale_document.save()

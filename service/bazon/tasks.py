@@ -89,7 +89,7 @@ def contractors_polling():
             ).exists():
                 # Проверяем существует ли сделка в бд, если да - проверяем изменена она или нет.
                 contractor = Contractor.objects.get(
-                    internal_id=contractor_json["internal_id"]
+                    internal_id=contractor_json["internal_id"],
                 )
                 contractor_dict = model_to_dict(contractor)
                 contractor_dict.pop("id")
