@@ -173,7 +173,7 @@ class BazonDeleteItemView(APIView):
         sale_document: SaleDocument = query.first()
         bazon_account: BazonAccount = sale_document.bazon_account
         bazon_api = bazon_account.get_api()
-        lock_key = bazon_api.generate_lock_key()
+        lock_key = bazon_api.generate_lock_key(sale_document.number)
         if not isinstance(lock_key, str):
             return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
         response = bazon_api.remove_document_items(sale_document.internal_id, lock_key=lock_key, items=[item])
