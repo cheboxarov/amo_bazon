@@ -213,7 +213,6 @@ class BazonMoveSaleView(APIView):
             amo_url = headers.get("Origin", "").split("//")[-1].split(".")[0]
         except Exception:
             return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
-
         query = SaleDocument.objects.filter(amo_lead_id=amo_lead_id)
         if not query.exists():
             return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)

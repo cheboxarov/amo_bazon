@@ -18,7 +18,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from bazon.views import (BazonSaleView, BazonSaleProductsView, BazonSalesListView,
-                         BazonItemsListView, BazonItemsAddView, BazonDeleteItemView, BazonDealOrdersView)
+                         BazonItemsListView, BazonItemsAddView, BazonDeleteItemView, BazonDealOrdersView,
+                         BazonMoveSaleView)
 from amo.views import AmoWebhookView
 
 
@@ -33,6 +34,7 @@ urlpatterns = [
         path("bazon-items/<str:amo_url>", BazonItemsListView.as_view()),
         path("bazon-sale/<int:amo_lead_id>/add-item", BazonItemsAddView.as_view()),
         path("bazon-sale/<int:amo_lead_id>/delete-item", BazonDeleteItemView.as_view()),
-        path("bazon-sale/<int:amo_lead_id>/orders", BazonDealOrdersView.as_view())
+        path("bazon-sale/<int:amo_lead_id>/orders", BazonDealOrdersView.as_view()),
+        path("bazon-sale/<int:amo_lead_id>/move", BazonMoveSaleView.as_view())
     ]))
 ]
