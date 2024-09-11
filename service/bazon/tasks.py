@@ -1,6 +1,5 @@
 from celery import shared_task
 from django.forms import model_to_dict
-
 from bazon.models import BazonAccount, SaleDocument, Contractor
 from utils.bazon_api import Bazon
 from .events import (
@@ -81,32 +80,34 @@ def contractors_polling():
             access_token=bazon_account.access_token,
         )
         response = bazon_api.get_contractors(limit=10)
-        data = response.json()
-        for contractor_json in data["response"][0]["result"]["contractors"]:
-            contractor_json["internal_id"] = contractor_json.pop("id")
-            contractor_json["bazon_account"] = bazon_account
-            if Contractor.objects.filter(
-                internal_id=contractor_json["internal_id"]
-            ).exists():
-                # Проверяем существует ли сделка в бд, если да - проверяем изменена она или нет.
-                contractor = Contractor.objects.get(
+        for amo_account in bazon_account.amo_accounts.all():
+            data = response.json()
+            for contractor_json in data["response"][0]["result"]["contractors"]:
+                contractor_json["internal_id"] = contractor_json.pop("id")
+                contractor_json["bazon_account"] = bazon_account
+                contractor_query = Contractor.objects.filter(
                     internal_id=contractor_json["internal_id"],
+                    amo_account=amo_account
                 )
-                contractor_dict = model_to_dict(contractor)
-                contractor_dict.pop("id")
-                contractor_dict.pop("bazon_account")
-                contractor_dict.pop("amo_id")
-                contractor_json.pop("bazon_account")
-                if contractor_dict != contractor_json:
-                    # Если сделка с апи отличается от той что в бд - актуализируем ее
-                    for key, value in contractor_json.items():
-                        if contractor_dict[key] != value:
-                            setattr(contractor, key, value)
-                    contractor.save()
-                    on_update_contractor(contractor_json, bazon_account)
-                continue
+                if contractor_query.exists():
+                    # Проверяем существует ли сделка в бд, если да - проверяем изменена она или нет.
+                    contractor = contractor_query.first()
+                    contractor_dict = model_to_dict(contractor)
+                    contractor_dict.pop("id")
+                    contractor_dict.pop("bazon_account")
+                    contractor_dict.pop("amo_id")
+                    contractor_dict.pop("amo_account")
+                    contractor_json.pop("bazon_account")
+                    if contractor_dict != contractor_json:
+                        # Если сделка с апи отличается от той что в бд - актуализируем ее
+                        for key, value in contractor_json.items():
+                            if contractor_dict[key] != value:
+                                setattr(contractor, key, value)
+                        contractor.save()
+                        on_update_contractor(contractor_json, amo_account)
+                    continue
 
-            contractor = Contractor.objects.create(**contractor_json)
-            on_create_contractor(
-                contractor_json, bazon_account
-            )  # документ летит в событие
+                contractor = Contractor.objects.create(**contractor_json, amo_account=amo_account)
+                on_create_contractor(
+                    contractor_json, amo_account
+                )  # документ летит в событие
