@@ -1,13 +1,11 @@
 import time
-
-from celery.bin.control import status
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework.status import *
 from rest_framework.views import APIView
 from .models import SaleDocument, BazonAccount
-from .serializers import BazonSaleDocumentSerializer, AddSalePaySerializer
+from .serializers import BazonSaleDocumentSerializer, AddSalePaySerializer, PayBackSaleSerializer
 from amo.models import AmoAccount
 from utils.serializers.bazon_serializers import ItemsListSerializer
 import hashlib
@@ -323,3 +321,39 @@ class BazonGetPaidSourcesView(APIView):
             return Response(response.json(), status=response.status_code)
         except:
             return Response({"Error": "Error to get paid sources"}, status=response.status_code)
+
+
+class BazonSalePayBack(APIView):
+
+    def post(self, request, amo_lead_id):
+
+        sale_document_query = SaleDocument.objects.filter(amo_lead_id=amo_lead_id)
+        if not sale_document_query.exists():
+            return Response({"Error": "Deal not found"}, status=HTTP_404_NOT_FOUND)
+        sale_document: SaleDocument = sale_document_query.first()
+        bazon_api = sale_document.bazon_account.get_api()
+
+        serializer = PayBackSaleSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+        validated_data = serializer.validated_data
+        pay_source = validated_data.get("pay_source")
+        pay_sum = validated_data.get("pay_sum")
+
+        lock_key = bazon_api.generate_lock_key(sale_document.number)
+        if lock_key is None:
+            return Response({"Error": "bad_lock_key"}, status=HTTP_502_BAD_GATEWAY)
+
+        response = bazon_api.sale_pay_back(sale_document.internal_id, lock_key, pay_source, pay_sum)
+
+        bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
+
+        if response.status_code == 200:
+            return Response({"Result": "Ok"}, status=HTTP_200_OK)
+
+        try:
+            return Response(response.json(), status=response.status_code)
+        except:
+            return Response({"Error": "Error to pay back"}, status=response.status_code)

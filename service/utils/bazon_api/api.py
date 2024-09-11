@@ -546,3 +546,21 @@ class Bazon:
         }
 
         return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getDocumentPaidSources", headers=self._headers, json=payload)
+
+    def sale_pay_back(self, document_id: int, lock_key: str, pay_source: int, sum: int):
+
+        payload = {
+            "request": {
+                "saleRefund": {
+                    "sumByPaySources": {
+                        str(pay_source): sum,
+                    },
+                    "sum": sum,
+                    "comment": "",
+                    "documentID": document_id,
+                    "lockKey": lock_key
+                }
+            }
+        }
+
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?saleRefund", headers=self._headers, json=payload)
