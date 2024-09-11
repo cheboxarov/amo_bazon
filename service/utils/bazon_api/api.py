@@ -6,6 +6,9 @@ import requests
 from typing import Collection
 
 from kombu.pools import reset
+from rest_framework.views import APIView
+
+from bazon.admin import SaleDocumentAdmin
 
 
 class Bazon:
@@ -520,3 +523,21 @@ class Bazon:
         }
 
         return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?salePay", headers=self._headers, json=payload)
+
+    def get_pay_sources(self):
+
+        payload = {
+            "request": {
+                "getPaySources": {
+                    "viewMode": "raw",
+                    "where": {
+                        "type": ["cash", "bank"]
+                    },
+                    "sorter": {
+                        "sorter": "asc"
+                    }
+                }
+            }
+        }
+
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getPaySources", headers=self._headers, json=payload)

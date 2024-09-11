@@ -277,3 +277,25 @@ class BazonAddSalePayView(APIView):
             return Response(response.json(), status=response.status_code)
         except:
             return Response({"Error": "Error to add pay"}, status=response.status_code)
+
+
+class BazonGetPaySourcesView(APIView):
+
+    def get(self, request, amo_lead_id):
+
+        sale_document_query = SaleDocument.objects.filter(amo_lead_id=amo_lead_id)
+        if not sale_document_query.exists():
+            return Response({"Error": "Deal not found"}, status=HTTP_404_NOT_FOUND)
+        sale_document: SaleDocument = sale_document_query.first()
+
+        bazon_api = sale_document.bazon_account.get_api()
+        response = bazon_api.get_pay_sources()
+        if response.status_code == 200:
+            response_json = response.json()
+            sources = response_json.get("response", {}).get("getPaySources", {}).get("PaySourcesList", {}).get("entitys", [])
+            return Response(sources, status=HTTP_200_OK)
+
+        try:
+            return Response(response.json, status=response.status_code)
+        except:
+            return Response({"Error": "Cant get pay sources"}, status=response.status_code)

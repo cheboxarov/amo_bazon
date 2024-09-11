@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 from bazon.views import (BazonSaleView, BazonSaleProductsView, BazonSalesListView,
                          BazonItemsListView, BazonItemsAddView, BazonDeleteItemView, BazonDealOrdersView,
-                         BazonMoveSaleView)
+                         BazonMoveSaleView, BazonAddSalePayView, BazonGetPaySourcesView)
 from amo.views import AmoWebhookView
 
 
@@ -35,6 +35,8 @@ urlpatterns = [
         path("bazon-sale/<int:amo_lead_id>/add-item", BazonItemsAddView.as_view()),
         path("bazon-sale/<int:amo_lead_id>/delete-item", BazonDeleteItemView.as_view()),
         path("bazon-sale/<int:amo_lead_id>/orders", BazonDealOrdersView.as_view()),
-        path("bazon-sale/<int:amo_lead_id>/move", BazonMoveSaleView.as_view())
+        path("bazon-sale/<int:amo_lead_id>/move", BazonMoveSaleView.as_view()),
+        path("bazon-sale/<int:amo_lead_id>/add-pay", BazonAddSalePayView.as_view()),
+        path("bazon-sale/<int:amo_lead_id>/get-pay-sources", BazonGetPaySourcesView.as_view())
     ]))
 ]
