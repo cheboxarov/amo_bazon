@@ -493,7 +493,7 @@ class Bazon:
         return requests.post(f"https://kontrabaz.baz-on.ru/frontend-api/?{method}", headers=self._headers, json=data)
 
     def sale_reserve(self, document_id: int, lock_key: str):
-        return self._sale_move(document_id, lock_key, "saleReverse")
+        return self._sale_move(document_id, lock_key, "saleReserve")
 
     def sale_cancel(self, document_id: int, lock_key: str):
         return self._sale_move(document_id, lock_key, "saleCancel")
