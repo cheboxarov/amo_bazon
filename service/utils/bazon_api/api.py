@@ -276,7 +276,7 @@ class Bazon:
         return response
 
     def get_contractors(self, offset: int = 0, limit: int = 500):
-        params = {"order": "asc", "limit": limit}
+        params = {"order": "desc", "limit": limit}
         if offset > 0:
             params["offset"] = offset
         url = "https://kontrabaz.baz-on.ru/external-api/v1/getContractors"
