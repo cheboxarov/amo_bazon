@@ -12,6 +12,7 @@ import hashlib
 
 
 class BazonSaleView(APIView):
+
     def get(self, request, amo_id):
         queryset = SaleDocument.objects.filter(amo_lead_id=amo_id)
         if not queryset.exists():
@@ -198,16 +199,22 @@ class BazonDealOrdersView(APIView):
 
 class BazonMoveSaleView(APIView):
 
+    """
+    Вью для перемещения сделок amo-bazon/bazon-sale/<amo_lead_id>/move
+    в теле запроса обязательно должен быть {
+    """
+
     def post(self, request, amo_lead_id: int):
         data = request.data
         state = data.get("state")
         if state is None:
             return Response({"Error": "Need state"}, status=HTTP_400_BAD_REQUEST)
-        if state == "reserve":
-            self.move_to_reserve(request, amo_lead_id)
+        if state not in ["reverse", "cancel"]:
+            return Response({"Error", "Invalid state"}, status=HTTP_400_BAD_REQUEST)
+        self.move_deal(request, amo_lead_id, state)
         return Response({"Result": "ok"}, status=HTTP_200_OK)
 
-    def move_to_reserve(self, request, amo_lead_id):
+    def move_deal(self, request, amo_lead_id, state):
         headers = request.headers
         try:
             amo_url = headers.get("Origin", "").split("//")[-1].split(".")[0]
@@ -224,7 +231,10 @@ class BazonMoveSaleView(APIView):
         if lock_key is None:
             return Response({"Error": "bad_lock_key"}, status=HTTP_404_NOT_FOUND)
 
-        bazon_api.sale_reserve(sale_document.internal_id, lock_key)
+        if state == "reserve":
+            bazon_api.sale_reserve(sale_document.internal_id, lock_key)
+        if state == "cancel":
+            bazon_api.cancel_sale(sale_document.internal_id, lock_key)
 
         bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
 

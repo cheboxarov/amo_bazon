@@ -481,16 +481,22 @@ class Bazon:
                                  headers=self._headers, json=data)
         return response
 
-    def sale_reserve(self, document_id: int, lock_key: str):
+    def _sale_move(self, document_id: int, lock_key: str, method: str) -> requests.Response:
         data = {
             "request": {
-                "saleReserve": {
+                method: {
                     "documentID": document_id,
                     "lockKey": lock_key,
                 }
             }
         }
-        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?saleReserve", headers=self._headers, json=data)
+        return requests.post(f"https://kontrabaz.baz-on.ru/frontend-api/?{method}", headers=self._headers, json=data)
+
+    def sale_reserve(self, document_id: int, lock_key: str):
+        return self._sale_move(document_id, lock_key, "saleReverse")
+
+    def sale_cancel(self, document_id: int, lock_key: str):
+        return self._sale_move(document_id, lock_key, "saleCancel")
 
     def generate_lock_key(self, document_number: str):
         response = self.set_lock_key(document_number)
