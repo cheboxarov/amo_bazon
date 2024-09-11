@@ -1,14 +1,7 @@
-import hashlib
 import json
-import time
-
 import requests
 from typing import Collection
 
-from kombu.pools import reset
-from rest_framework.views import APIView
-
-from bazon.admin import SaleDocumentAdmin
 
 
 class Bazon:
