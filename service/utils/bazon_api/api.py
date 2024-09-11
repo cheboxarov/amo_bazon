@@ -503,3 +503,20 @@ class Bazon:
         response.raise_for_status()
         lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
         return lock_key
+
+    def add_sale_pay(self, document_id: int, lock_key: str, pay_source: int, pay_sum: float, comment: str = ""):
+        payload = {
+            "request": {
+                "salePay": {
+                    "sumByPaySources": {
+                        str(pay_source): str(pay_sum)
+                    },
+                    "sum": str(pay_sum),
+                    "comment": comment,
+                    "documentID": document_id,
+                    "lockKey": lock_key
+                }
+            }
+        }
+
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?salePay", headers=self._headers, json=payload)
