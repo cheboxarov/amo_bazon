@@ -8,5 +8,6 @@ admin.site.register(BazonAccount)
 class SaleDocumentAdmin(admin.ModelAdmin):
     list_display = ('internal_id', 'amo_account', "bazon_account", "status", "amo_lead_id")
 
-
-admin.site.register(Contractor)
+@admin.register(Contractor)
+class ContractorAdmin(admin.ModelAdmin):
+    list_display = ('internal_id', 'amo_account', 'name')
