@@ -44,7 +44,8 @@ class BazonAccount(models.Model):
 class SaleDocument(models.Model):
 
     bazon_account = models.ForeignKey(BazonAccount, on_delete=models.CASCADE)
-    internal_id = models.PositiveIntegerField(unique=True)
+    amo_account = models.ForeignKey("amo.AmoAccount", on_delete=models.CASCADE)
+    internal_id = models.PositiveIntegerField()
     number = models.CharField(max_length=255, null=True, blank=True)
     type = models.CharField(max_length=50, null=True, blank=True)
     status = models.CharField(max_length=50, null=True, blank=True)
@@ -56,13 +57,16 @@ class SaleDocument(models.Model):
     manager_name = models.CharField(max_length=255, null=True, blank=True)
     amo_lead_id = models.PositiveIntegerField(blank=True, null=True)
 
-    def __str__(self):
-        return f"{self.internal_id} ({self.contractor_name})"
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['amo_account', 'internal_id'], name='unique_internal_id_per_amo_account')
+        ]
 
 
 class Contractor(models.Model):
     bazon_account = models.ForeignKey(BazonAccount, on_delete=models.CASCADE)
-    internal_id = models.PositiveIntegerField(unique=True)
+    amo_account = models.ForeignKey("amo.AmoAccount", on_delete=models.CASCADE)
+    internal_id = models.PositiveIntegerField()
     name = models.CharField(max_length=255)
     type = models.CharField(max_length=50)
     phone = models.CharField(max_length=50, null=True, blank=True)
@@ -72,6 +76,11 @@ class Contractor(models.Model):
     balance_reserve = models.PositiveIntegerField()
     balance = models.PositiveIntegerField()
     amo_id = models.PositiveIntegerField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['amo_account', 'internal_id'], name='unique_internal_id_per_amo'),
+        ]
 
     def __str__(self):
         return self.name

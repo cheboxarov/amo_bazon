@@ -2,7 +2,7 @@ from django.db import models
 
 
 class AmoAccount(models.Model):
-    suburl = models.CharField(max_length=255)
+    suburl = models.CharField(max_length=255, unique=True)
     token = models.TextField()
     bazon_accounts = models.ManyToManyField('bazon.BazonAccount', related_name='amo_accounts')
 

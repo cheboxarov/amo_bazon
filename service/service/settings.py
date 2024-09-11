@@ -136,29 +136,19 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_RESULT_BACKEND = "redis://redis:6379/1"
 CELERY_TIMEZONE = "Asia/Krasnoyarsk"  # Установите нужный часовой пояс
 
-from celery.schedules import crontab
+from celery.schedules import schedule
 
 CELERY_BEAT_SCHEDULE = {
     "sale_documents_polling": {
         "task": "bazon.tasks.sale_documents_polling",
-        "schedule": crontab(minute="*"),  # Каждую минуту
+        "schedule": schedule(15.0),  # Каждые 15 секунд
     },
     "contractors_polling": {
         "task": "bazon.tasks.contractors_polling",
-        "schedule": crontab(minute="*"),  # Каждую минуту
+        "schedule": schedule(15.0),  # Каждые 15 секунд
     },
     "sync_amo_data": {
         "task": "amo.tasks.sync_amo_data",
-        "schedule": crontab(minute="*"),  # Каждую минуту
+        "schedule": schedule(15.0),  # Каждые 15 секунд
     },
-}
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': "redis://redis:6379/2",
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
-    }
 }

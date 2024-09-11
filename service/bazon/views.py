@@ -4,11 +4,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.response import Response
 from rest_framework.status import *
 from rest_framework.views import APIView
-from sqlparse.utils import consume
-
 from .models import SaleDocument, BazonAccount
 from .serializers import BazonSaleDocumentSerializer
-from utils.bazon_api import Bazon
 from amo.models import AmoAccount
 from utils.serializers.bazon_serializers import ItemsListSerializer
 import hashlib
@@ -91,9 +88,7 @@ class BazonItemsAddView(APIView):
         data = request.data
         headers = request.headers
         try:
-            amo_url = headers.get("Origin", "").split("//")[-1].split(".")[0]
-            if amo_url is None:
-                return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
+            headers.get("Origin", "").split("//")[-1].split(".")[0]
         except Exception:
             return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
         deal_id = data.get("dealId")
@@ -178,18 +173,11 @@ class BazonDeleteItemView(APIView):
         sale_document: SaleDocument = query.first()
         bazon_account: BazonAccount = sale_document.bazon_account
         bazon_api = bazon_account.get_api()
-        hash_token = hashlib.md5()
-        hash_token.update(str(time.time()).encode("utf-8"))
-        token = hash_token.hexdigest()[:16]
-        response = bazon_api.set_lock_key(sale_document.number, token)
-        response.raise_for_status()
-        lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
+        lock_key = bazon_api.generate_lock_key(sale_document.number)
         if not isinstance(lock_key, str):
             return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
-        print(lock_key)
         response = bazon_api.remove_document_items(sale_document.internal_id, lock_key=lock_key, items=[item])
         bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
-        print(response)
         return Response({"Result": "ok"}, status=HTTP_200_OK)
 
 
@@ -206,3 +194,38 @@ class BazonDealOrdersView(APIView):
         if response.status_code == 200:
             return Response(response.json().get("response",[{}])[0].get("result", {}).get("orders",[]), status=HTTP_200_OK)
         return Response({"Result": "Ok"}, status=HTTP_200_OK)
+
+
+class BazonMoveSaleView(APIView):
+
+    def post(self, request, amo_lead_id: int):
+        data = request.data
+        state = data.get("state")
+        if state is None:
+            return Response({"Error": "Need state"}, status=HTTP_400_BAD_REQUEST)
+        if state == "reserve":
+            self.move_to_reserve(request, amo_lead_id)
+        return Response({"Result": "ok"}, status=HTTP_200_OK)
+
+    def move_to_reserve(self, request, amo_lead_id):
+        headers = request.headers
+        try:
+            amo_url = headers.get("Origin", "").split("//")[-1].split(".")[0]
+        except Exception:
+            return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
+        query = SaleDocument.objects.filter(amo_lead_id=amo_lead_id)
+        if not query.exists():
+            return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)
+        sale_document: SaleDocument = query.first()
+        bazon_account: BazonAccount = sale_document.bazon_account
+        bazon_api = bazon_account.get_api()
+
+        lock_key = bazon_api.generate_lock_key(sale_document.number)
+        if lock_key is None:
+            return Response({"Error": "bad_lock_key"}, status=HTTP_404_NOT_FOUND)
+
+        bazon_api.sale_reserve(sale_document.internal_id, lock_key)
+
+        bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
+
+        return Response({"Result": "Moved"}, status=HTTP_200_OK)

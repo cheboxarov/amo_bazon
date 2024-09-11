@@ -22,7 +22,7 @@ def sync_amo_data():
                 )
                 if status_queryset.exists():
                     # Обновление всех найденных записей (если их несколько)
-                    status_queryset.update(name=status_data["name"])
+                    status_queryset.update(name=f'{status_data["name"]} ({pipeline["name"]})')
                 else:
                     # Добавление нового статуса
                     Status.objects.create(

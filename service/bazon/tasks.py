@@ -22,46 +22,53 @@ def sale_documents_polling():
             access_token=bazon_account.access_token,
         )
         params = {
-            "limit": 10,
+            "limit": 50,
         }
         response = bazon_api.get_sale_documents(params=params)
         if response.status_code != 200:
             bazon_account.refresh_auth()
             return
-        data = response.json()
+        for amo_account in bazon_account.amo_accounts.all():
+            data = response.json()
+            for json_document in data["response"][0]["result"]["sale_documents"]:
+                try:
+                    json_document["internal_id"] = json_document.pop("id")
+                except Exception as e:
+                    print(json_document)
+                    continue
+                json_document["bazon_account"] = bazon_account
+                if SaleDocument.objects.filter(
+                    internal_id=json_document["internal_id"],
+                    amo_account=amo_account
+                ).exists():
+                    # Проверяем существует ли сделка в бд, если да - проверяем изменена она или нет.
+                    sale_document = SaleDocument.objects.get(
+                        internal_id=json_document["internal_id"],
+                        amo_account=amo_account
+                    )
+                    document_dict = model_to_dict(sale_document)
+                    document_dict.pop("id")
+                    document_dict.pop("bazon_account")
+                    document_dict.pop("amo_lead_id")
+                    document_dict.pop("amo_account")
+                    json_document.pop("bazon_account")
+                    if document_dict != json_document:
+                        # Если сделка с апи отличается от той что в бд - актуализируем ее
+                        for key, value in json_document.items():
+                            if document_dict[key] != value:
+                                setattr(sale_document, key, value)
+                        sale_document.save()
+                        on_update_sale_document(json_document, amo_account)
+                    continue
+                try:
+                    SaleDocument.objects.create(**json_document, amo_account=amo_account)
+                except:
+                    pass
+                on_create_sale_document(
+                    json_document, amo_account
+                )  # документ летит в событие
 
-        for json_document in data["response"][0]["result"]["sale_documents"]:
-            json_document["internal_id"] = json_document.pop("id")
-            json_document["bazon_account"] = bazon_account
-            if SaleDocument.objects.filter(
-                internal_id=json_document["internal_id"]
-            ).exists():
-                # Проверяем существует ли сделка в бд, если да - проверяем изменена она или нет.
-                sale_document = SaleDocument.objects.get(
-                    internal_id=json_document["internal_id"]
-                )
-                document_dict = model_to_dict(sale_document)
-                document_dict.pop("id")
-                document_dict.pop("bazon_account")
-                document_dict.pop("amo_lead_id")
-                json_document.pop("bazon_account")
-                if document_dict != json_document:
-                    # Если сделка с апи отличается от той что в бд - актуализируем ее
-                    for key, value in json_document.items():
-                        if document_dict[key] != value:
-                            setattr(sale_document, key, value)
-                    sale_document.save()
-                    on_update_sale_document(json_document, bazon_account)
-                continue
-            try:
-                SaleDocument.objects.create(**json_document)
-            except:
-                pass
-            on_create_sale_document(
-                json_document, bazon_account
-            )  # документ летит в событие
-
-            # Отправка сделки в амо CRM
+                # Отправка сделки в амо CRM
 
 
 @shared_task
@@ -83,7 +90,7 @@ def contractors_polling():
             ).exists():
                 # Проверяем существует ли сделка в бд, если да - проверяем изменена она или нет.
                 contractor = Contractor.objects.get(
-                    internal_id=contractor_json["internal_id"]
+                    internal_id=contractor_json["internal_id"],
                 )
                 contractor_dict = model_to_dict(contractor)
                 contractor_dict.pop("id")
