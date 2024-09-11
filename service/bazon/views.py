@@ -230,12 +230,16 @@ class BazonMoveSaleView(APIView):
         lock_key = bazon_api.generate_lock_key(sale_document.number)
         if lock_key is None:
             return Response({"Error": "bad_lock_key"}, status=HTTP_404_NOT_FOUND)
-
+        response = None
         if state == "reserve":
-            bazon_api.sale_reserve(sale_document.internal_id, lock_key)
+            response = bazon_api.sale_reserve(sale_document.internal_id, lock_key)
         if state == "cancel":
-            bazon_api.cancel_sale(sale_document.internal_id, lock_key)
+            response = bazon_api.cancel_sale(sale_document.internal_id, lock_key)
 
         bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
-
-        return Response({"Result": "Moved"}, status=HTTP_200_OK)
+        if response.status_code == 200:
+            return Response({"Result": "Moved"}, status=HTTP_200_OK)
+        try:
+            return Response(response.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
+        except:
+            return Response({"Error": "Error to move deal"}, status=HTTP_500_INTERNAL_SERVER_ERROR)
