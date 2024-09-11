@@ -33,6 +33,19 @@ ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = ["https://wlovem.ru", "https://www.wlovem.ru"]
 
+if DEBUG:
+    LOGGING = {
+        'version': 1,
+        'handlers': {
+            'console':  {'class': 'logging.StreamHandler'}
+        },
+        'loggers': {
+            'django.db.backends': {
+                'handlers': ['console'],
+                'level': 'DEBUG'
+            }
+        }
+    }
 
 # Application definition
 

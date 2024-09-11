@@ -55,7 +55,7 @@ class BazonSalesListView(APIView):
         lead_ids = data.get("lead_ids", [])
         if len(lead_ids) == 0:
             return Response({"Error": "Need lead_ids"}, status=HTTP_400_BAD_REQUEST)
-        documents = SaleDocument.objects.filter(amo_lead_id__in=lead_ids).all()
+        documents = SaleDocument.objects.filter(amo_lead_id__in=lead_ids).prefetch_related("bazon_account", "amo_account").all()
         serializer = BazonSaleDocumentSerializer(documents, many=True)
         return Response(serializer.data, status=HTTP_200_OK)
 
