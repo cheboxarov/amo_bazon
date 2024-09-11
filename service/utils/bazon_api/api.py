@@ -534,3 +534,15 @@ class Bazon:
         }
 
         return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getPaySources", headers=self._headers, json=payload)
+
+    def get_paid_sources(self, document_id: int):
+
+        payload = {
+            "request": {
+                "getDocumentPaidSources": {
+                    "documentID": document_id
+                }
+            }
+        }
+
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getDocumentPaidSources", headers=self._headers, json=payload)
