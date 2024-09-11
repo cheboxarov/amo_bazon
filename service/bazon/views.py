@@ -209,7 +209,7 @@ class BazonMoveSaleView(APIView):
         state = data.get("state")
         if state is None:
             return Response({"Error": "Need state"}, status=HTTP_400_BAD_REQUEST)
-        if state not in ["reverse", "cancel"]:
+        if state not in ["reserve", "cancel"]:
             return Response({"Error", "Invalid state"}, status=HTTP_400_BAD_REQUEST)
         self.move_deal(request, amo_lead_id, state)
         return Response({"Result": "ok"}, status=HTTP_200_OK)
