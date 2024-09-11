@@ -33,7 +33,9 @@ ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = ["https://wlovem.ru", "https://www.wlovem.ru"]
 
-if DEBUG:
+SQL_DEBUG = False
+
+if SQL_DEBUG:
     LOGGING = {
         'version': 1,
         'handlers': {
