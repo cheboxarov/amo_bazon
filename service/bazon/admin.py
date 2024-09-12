@@ -8,6 +8,7 @@ admin.site.register(BazonAccount)
 class SaleDocumentAdmin(admin.ModelAdmin):
     list_display = (
         "internal_id",
+        "number",
         "amo_account",
         "bazon_account",
         "status",

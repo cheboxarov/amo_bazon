@@ -37,11 +37,11 @@ class BazonSaleView(CustomAPIView, SaleDocumentMixin):
 
 
 
-class BazonSaleProductsView(CustomAPIView, SaleDocumentMixin):
+class BazonSaleDetailView(CustomAPIView, SaleDocumentMixin):
 
     def get(self, request, amo_id):
         subdomain = self.check_origin(request)
-        logger.info(f"{subdomain}: BazonSaleProductsView - Начало обработки запроса")
+        logger.info(f"{subdomain}: BazonSaleDetailView - Начало обработки запроса")
 
         sale_document = self.get_sale_document(amo_lead_id=amo_id)
         bazon_account: BazonAccount = sale_document.bazon_account
@@ -58,10 +58,10 @@ class BazonSaleProductsView(CustomAPIView, SaleDocumentMixin):
                 .get("DocumentItemsList", {})
                 .get("entitys", []),
             }
-            logger.info(f"{subdomain}: BazonSaleProductsView - Успешное получение деталей документа")
+            logger.info(f"{subdomain}: BazonSaleDetailView - Успешное получение деталей документа")
             return Response(validated_data, status=HTTP_200_OK)
 
-        logger.error(f"{subdomain}: BazonSaleProductsView - Ошибка подключения к Bazon")
+        logger.error(f"{subdomain}: BazonSaleDetailView - Ошибка подключения к Bazon")
         return Response({"Error": "Cant connect to bazon"}, status=HTTP_200_OK)
 
 
