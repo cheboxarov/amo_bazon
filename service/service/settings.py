@@ -52,6 +52,7 @@ if SQL_DEBUG:
 # Application definition
 
 INSTALLED_APPS = [
+    "grappelli",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -62,7 +63,6 @@ INSTALLED_APPS = [
     "celery",
     "bazon",
     "amo",
-    "grappelli",
 ]
 
 MIDDLEWARE = [
