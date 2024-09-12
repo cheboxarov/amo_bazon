@@ -1,33 +1,37 @@
 import time
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
+from django.middleware.csrf import CsrfViewMiddleware
 from rest_framework.response import Response
 from rest_framework.status import *
 from rest_framework.views import APIView
+
+from utils.bazon_api import Bazon
 from .models import SaleDocument, BazonAccount
 from .serializers import BazonSaleDocumentSerializer, AddSalePaySerializer, PayBackSaleSerializer
 from amo.models import AmoAccount
 from utils.serializers.bazon_serializers import ItemsListSerializer
 import hashlib
+from .mixins import OriginCheckMixin, SaleDocumentMixin, BazonApiMixin
 
 
-class BazonSaleView(APIView):
+class CustomAPIView(OriginCheckMixin, APIView):
+    pass
+
+
+class BazonSaleView(CustomAPIView, SaleDocumentMixin):
 
     def get(self, request, amo_id):
-        queryset = SaleDocument.objects.filter(amo_lead_id=amo_id)
-        if not queryset.exists():
-            return Response({"Error": "Not found"}, status=HTTP_404_NOT_FOUND)
-        sale_document = queryset.first()
+        self.check_origin(request)
+        sale_document = self.get_sale_document(amo_lead_id=amo_id)
         serializer = BazonSaleDocumentSerializer(sale_document)
         return Response(serializer.data, status=HTTP_200_OK)
 
 
-class BazonSaleProductsView(APIView):
+class BazonSaleProductsView(CustomAPIView, SaleDocumentMixin):
     def get(self, request, amo_id):
-        queryset = SaleDocument.objects.filter(amo_lead_id=amo_id)
-        if not queryset.exists():
-            return Response({"Error": "Not found"}, status=HTTP_404_NOT_FOUND)
-        sale_document: SaleDocument = queryset.first()
+        self.check_origin(request)
+        sale_document = self.get_sale_document(amo_lead_id=amo_id)
         bazon_account: BazonAccount = sale_document.bazon_account
         bazon_api = bazon_account.get_api()
         response = bazon_api.get_detail_document(int(sale_document.number))
@@ -44,14 +48,16 @@ class BazonSaleProductsView(APIView):
         return Response({"Error": "Cant connect to bazon"}, status=HTTP_200_OK)
 
 
-class BazonSalesListView(APIView):
+class BazonSalesListView(CustomAPIView):
 
     def get(self, request):
+        self.check_origin(request)
         queryset = SaleDocument.objects
         serializer = BazonSaleDocumentSerializer(queryset.all(), many=True)
         return Response(serializer.data, status=HTTP_200_OK)
 
     def post(self, request):
+        self.check_origin(request)
         data = request.data
         lead_ids = data.get("lead_ids", [])
         if len(lead_ids) == 0:
@@ -61,8 +67,9 @@ class BazonSalesListView(APIView):
         return Response(serializer.data, status=HTTP_200_OK)
 
 
-class BazonItemsListView(APIView):
+class BazonItemsListView(CustomAPIView):
     def get(self, request, amo_url):
+        self.check_origin(request)
         try:
             amo_account = AmoAccount.objects.get(suburl=amo_url)
         except ObjectDoesNotExist:
@@ -83,25 +90,18 @@ class BazonItemsListView(APIView):
             return Response(response.json(), status=HTTP_502_BAD_GATEWAY)
 
 
-class BazonItemsAddView(APIView):
+class BazonItemsAddView(CustomAPIView, SaleDocumentMixin):
 
     def post(self, request, amo_lead_id):
         data = request.data
-        headers = request.headers
-        try:
-            headers.get("Origin", "").split("//")[-1].split(".")[0]
-        except Exception:
-            return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
+        self.check_origin(request)
         deal_id = data.get("dealId")
         if deal_id is None:
             return Response({"Error": "Need dealId"}, status=HTTP_400_BAD_REQUEST)
         items = data.get("items")
         if not isinstance(items, list):
             return Response({"Error": "Array of items expected"}, status=HTTP_400_BAD_REQUEST)
-        query = SaleDocument.objects.filter(amo_lead_id=deal_id)
-        if not query.exists():
-            return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)
-        sale_document: SaleDocument = query.first()
+        sale_document = self.get_sale_document(amo_lead_id=deal_id)
         bazon_account: BazonAccount = sale_document.bazon_account
         bazon_api = bazon_account.get_api()
         hash_token = hashlib.md5()
@@ -151,53 +151,42 @@ class BazonItemsAddView(APIView):
         return Response({"Result": "Ok"}, status=HTTP_200_OK)
 
 
-class BazonDeleteItemView(APIView):
+class BazonDeleteItemView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
     def post(self, request, amo_lead_id):
         data = request.data
-        headers = request.headers
-        try:
-            amo_url = headers.get("Origin", "").split("//")[-1].split(".")[0]
-            if amo_url is None:
-                return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
-        except Exception:
-            return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
+        self.check_origin(request)
         deal_id = data.get("dealId")
         if deal_id is None:
             return Response({"Error": "Need dealId"}, status=HTTP_400_BAD_REQUEST)
         item: int = data.get("itemId")
         if not isinstance(item, int):
             return Response({"Error": "Array of items expected"}, status=HTTP_400_BAD_REQUEST)
-        query = SaleDocument.objects.filter(amo_lead_id=deal_id)
-        if not query.exists():
-            return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)
-        sale_document: SaleDocument = query.first()
+        sale_document = self.get_sale_document(amo_lead_id=deal_id)
         bazon_account: BazonAccount = sale_document.bazon_account
         bazon_api = bazon_account.get_api()
-        lock_key = bazon_api.generate_lock_key(sale_document.number)
-        if not isinstance(lock_key, str):
-            return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
-        response = bazon_api.remove_document_items(sale_document.internal_id, lock_key=lock_key, items=[item])
-        bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
-        return Response({"Result": "ok"}, status=HTTP_200_OK)
+        with sale_document.generate_lock_key() as lock_key:
+            response = bazon_api.remove_document_items(sale_document.internal_id, lock_key=lock_key, items=[item])
+            if response.status_code == 200:
+                return Response({"Result": "ok"}, status=HTTP_200_OK)
+        return self.return_response_error(response)
 
 
-class BazonDealOrdersView(APIView):
+class BazonDealOrdersView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
     def get(self, request, amo_lead_id):
-        document_query = SaleDocument.objects.filter(amo_lead_id=amo_lead_id)
-        if not document_query.exists():
-            return Response({"Error": "Document not exists"}, status=HTTP_404_NOT_FOUND)
-        sale_document: SaleDocument = document_query.first()
+        self.check_origin(request)
+        sale_document = self.get_sale_document(amo_lead_id=amo_lead_id)
         bazon_account: BazonAccount = sale_document.bazon_account
         bazon_api = bazon_account.get_api()
         response = bazon_api.get_orders(for_sale_document=sale_document.number)
         if response.status_code == 200:
             return Response(response.json().get("response",[{}])[0].get("result", {}).get("orders",[]), status=HTTP_200_OK)
-        return Response({"Result": "Ok"}, status=HTTP_200_OK)
+
+        return self.return_response_error(response)
 
 
-class BazonMoveSaleView(APIView):
+class BazonMoveSaleView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
     """
     Вью для перемещения сделок amo-bazon/bazon-sale/<amo_lead_id>/move
@@ -205,6 +194,7 @@ class BazonMoveSaleView(APIView):
     """
 
     def post(self, request, amo_lead_id: int):
+        self.check_origin(request)
         data = request.data
         state = data.get("state")
         if state is None:
@@ -214,44 +204,33 @@ class BazonMoveSaleView(APIView):
         return self.move_deal(request, amo_lead_id, state)
 
     def move_deal(self, request, amo_lead_id, state):
-        headers = request.headers
-        try:
-            amo_url = headers.get("Origin", "").split("//")[-1].split(".")[0]
-        except Exception:
-            return Response({"Error": "Bad origin"}, status=HTTP_400_BAD_REQUEST)
-        query = SaleDocument.objects.filter(amo_lead_id=amo_lead_id)
-        if not query.exists():
-            return Response({"Error": "Sale document not found"}, status=HTTP_404_NOT_FOUND)
-        sale_document: SaleDocument = query.first()
+        self.check_origin(request)
+        sale_document = self.get_sale_document(amo_lead_id=amo_lead_id)
         bazon_account: BazonAccount = sale_document.bazon_account
         bazon_api = bazon_account.get_api()
 
-        lock_key = bazon_api.generate_lock_key(sale_document.number)
-        if lock_key is None:
-            return Response({"Error": "bad_lock_key"}, status=HTTP_404_NOT_FOUND)
-        response = None
-        if state == "reserve":
-            response = bazon_api.sale_reserve(sale_document.internal_id, lock_key)
-        if state == "cancel":
-            response = bazon_api.cancel_sale(sale_document.internal_id, lock_key)
-        if state == "recreate":
-            response = bazon_api.sale_recreate(sale_document.internal_id, lock_key)
+        with sale_document.generate_lock_key() as lock_key:
+            if lock_key is None:
+                return Response({"Error": "bad_lock_key"}, status=HTTP_404_NOT_FOUND)
+            response = None
+            if state == "reserve":
+                response = bazon_api.sale_reserve(sale_document.internal_id, lock_key)
+            if state == "cancel":
+                response = bazon_api.cancel_sale(sale_document.internal_id, lock_key)
+            if state == "recreate":
+                response = bazon_api.sale_recreate(sale_document.internal_id, lock_key)
 
-        bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
         if response.status_code == 200:
             return Response({"Result": "Moved"}, status=HTTP_200_OK)
-        try:
-            return Response(response.json(), status=HTTP_500_INTERNAL_SERVER_ERROR)
-        except:
-            return Response({"Error": "Error to move deal"}, status=HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return self.return_response_error(response)
 
 
-class BazonAddSalePayView(APIView):
+class BazonAddSalePayView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
     def post(self, request, amo_lead_id):
-        sale_document_query = SaleDocument.objects.filter(amo_lead_id=amo_lead_id)
-        if not sale_document_query.exists():
-            return Response({"Error": "Sale not found"}, status=HTTP_404_NOT_FOUND)
+        self.check_origin(request)
+        sale_document = self.get_sale_document(amo_lead_id=amo_lead_id)
 
         serializer = AddSalePaySerializer(data=request.data)
 
@@ -263,52 +242,42 @@ class BazonAddSalePayView(APIView):
         pay_sum = validated_data.get("pay_sum")
         comment = validated_data.get("comment")
 
-        sale_document: SaleDocument = sale_document_query.first()
         bazon_api = sale_document.bazon_account.get_api()
 
-        lock_key = bazon_api.generate_lock_key(sale_document.number)
-        if lock_key is None:
-            return Response({"Error": "bad_lock_key"}, status=HTTP_423_LOCKED)
-        response = bazon_api.add_sale_pay(sale_document.internal_id, lock_key, pay_source, pay_sum, comment)
-        bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
+        with sale_document.generate_lock_key() as lock_key:
+            if lock_key is None:
+                return Response({"Error": "bad_lock_key"}, status=HTTP_423_LOCKED)
+            response = bazon_api.add_sale_pay(sale_document.internal_id, lock_key, pay_source, pay_sum, comment)
+
         if response.status_code == 200:
             return Response({"result": "ok"}, status=HTTP_200_OK)
-        try:
-            return Response(response.json(), status=response.status_code)
-        except:
-            return Response({"Error": "Error to add pay"}, status=response.status_code)
+
+        return self.return_response_error(response)
 
 
-class BazonGetPaySourcesView(APIView):
+class BazonGetPaySourcesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
     def get(self, request, amo_lead_id):
 
-        sale_document_query = SaleDocument.objects.filter(amo_lead_id=amo_lead_id)
-        if not sale_document_query.exists():
-            return Response({"Error": "Deal not found"}, status=HTTP_404_NOT_FOUND)
-        sale_document: SaleDocument = sale_document_query.first()
+        self.check_origin(request)
 
-        bazon_api = sale_document.bazon_account.get_api()
+        sale_document = self.get_sale_document(amo_lead_id)
+
+        bazon_api = sale_document.get_api()
         response = bazon_api.get_pay_sources()
         if response.status_code == 200:
             response_json = response.json()
             sources = response_json.get("response", {}).get("getPaySources", {}).get("PaySourcesList", {}).get("entitys", [])
             return Response(sources, status=HTTP_200_OK)
 
-        try:
-            return Response(response.json, status=response.status_code)
-        except:
-            return Response({"Error": "Cant get pay sources"}, status=response.status_code)
+        return self.return_response_error(response)
 
 
-class BazonGetPaidSourcesView(APIView):
+class BazonGetPaidSourcesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
     def get(self, request, amo_lead_id):
 
-        sale_document_query = SaleDocument.objects.filter(amo_lead_id=amo_lead_id)
-        if not sale_document_query.exists():
-            return Response({"Error": "Deal not found"}, status=HTTP_404_NOT_FOUND)
-        sale_document: SaleDocument = sale_document_query.first()
+        sale_document = self.get_sale_document(amo_lead_id)
         bazon_api = sale_document.bazon_account.get_api()
 
         response = bazon_api.get_paid_sources(sale_document.internal_id)
@@ -317,20 +286,16 @@ class BazonGetPaidSourcesView(APIView):
             data = response.json()
             return Response(data.get("response", {}).get("getDocumentPaidSources", {}).get("paidSources", {}), status=HTTP_200_OK)
 
-        try:
-            return Response(response.json(), status=response.status_code)
-        except:
-            return Response({"Error": "Error to get paid sources"}, status=response.status_code)
+        return self.return_response_error(response)
 
 
-class BazonSalePayBack(APIView):
+class BazonSalePayBack(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
     def post(self, request, amo_lead_id):
 
-        sale_document_query = SaleDocument.objects.filter(amo_lead_id=amo_lead_id)
-        if not sale_document_query.exists():
-            return Response({"Error": "Deal not found"}, status=HTTP_404_NOT_FOUND)
-        sale_document: SaleDocument = sale_document_query.first()
+        self.check_origin(request)
+
+        sale_document = self.get_sale_document(amo_lead_id)
         bazon_api = sale_document.bazon_account.get_api()
 
         serializer = PayBackSaleSerializer(data=request.data)
@@ -342,18 +307,12 @@ class BazonSalePayBack(APIView):
         pay_source = validated_data.get("pay_source")
         pay_sum = validated_data.get("pay_sum")
 
-        lock_key = bazon_api.generate_lock_key(sale_document.number)
-        if lock_key is None:
-            return Response({"Error": "bad_lock_key"}, status=HTTP_502_BAD_GATEWAY)
-
-        response = bazon_api.sale_pay_back(sale_document.internal_id, lock_key, pay_source, pay_sum)
-
-        bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
+        with sale_document.generate_lock_key() as lock_key:
+            if lock_key is None:
+                return Response({"Error": "bad_lock_key"}, status=HTTP_502_BAD_GATEWAY)
+            response = bazon_api.sale_pay_back(sale_document.internal_id, lock_key, pay_source, pay_sum)
 
         if response.status_code == 200:
             return Response({"Result": "Ok"}, status=HTTP_200_OK)
 
-        try:
-            return Response(response.json(), status=response.status_code)
-        except:
-            return Response({"Error": "Error to pay back"}, status=response.status_code)
+        return self.return_response_error(response)

@@ -62,6 +62,31 @@ class SaleDocument(models.Model):
             models.UniqueConstraint(fields=['amo_account', 'internal_id'], name='unique_internal_id_per_amo_account')
         ]
 
+    def get_api(self):
+        return self.bazon_account.get_api()
+
+    class _GenerateLockKey:
+
+        def __init__(self, sale_document: "SaleDocument"):
+            self.sale_document = sale_document
+            self.lock_key = None
+
+        def __enter__(self):
+            api = self.sale_document.get_api()
+            lock_key = api.generate_lock_key(self.sale_document.number)
+            if lock_key is None:
+                print("Error to generate lock key")
+            self.lock_key = lock_key
+            return self.lock_key
+
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            if self.lock_key is not None:
+                api = self.sale_document.get_api()
+                api.drop_lock_key(self.sale_document.internal_id, self.lock_key)
+
+    def generate_lock_key(self):
+        return self._GenerateLockKey(self)
+
 
 class Contractor(models.Model):
     bazon_account = models.ForeignKey(BazonAccount, on_delete=models.CASCADE)
