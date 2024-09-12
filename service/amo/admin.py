@@ -6,8 +6,8 @@ admin.site.register(AmoAccount)
 
 @admin.register(Status)
 class StatusAdmin(admin.ModelAdmin):
-    fields = ("name", "amo_account", "bazon_status")
+    list_display = fields = ("name", "amo_account", "bazon_status")
 
 @admin.register(Manager)
 class AdminManager(admin.ModelAdmin):
-    fields = ("name", "amo_account")
+    list_display = fields = ("name", "amo_account")
