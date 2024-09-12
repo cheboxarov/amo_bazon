@@ -90,7 +90,7 @@ class BazonItemsListView(CustomAPIView):
             return Response(response.json(), status=HTTP_502_BAD_GATEWAY)
 
 
-class BazonItemsAddView(CustomAPIView, SaleDocumentMixin):
+class BazonItemsAddView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
     def post(self, request, amo_lead_id):
         data = request.data
@@ -104,51 +104,41 @@ class BazonItemsAddView(CustomAPIView, SaleDocumentMixin):
         sale_document = self.get_sale_document(amo_lead_id=deal_id)
         bazon_account: BazonAccount = sale_document.bazon_account
         bazon_api = bazon_account.get_api()
-        hash_token = hashlib.md5()
-        hash_token.update(str(time.time()).encode("utf-8"))
-        token = hash_token.hexdigest()[:16]
-        response = bazon_api.set_lock_key(sale_document.number, token)
-        response.raise_for_status()
-        lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
-        if not isinstance(lock_key, str):
-            return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
-        print(lock_key)
-        items_to_add = []
-        for item in items:
-            storage_id = item.get("storageId")
-            if storage_id is None:
-                continue
-            product_id = item.get("productId")
-            if product_id is None:
-                continue
-            amount = item.get("quantity")
-            if amount is None:
-                continue
-            items_to_add.append({
-                "objectID": item.get("productId"),
-                "objectType": "Product",
-                "amount": amount,
-                "storageID": storage_id,
-                "id": "-1"
-            })
-            item_to_add = [
-                {
+        with sale_document.generate_lock_key() as lock_key:
+            if not isinstance(lock_key, str):
+                return Response({"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY)
+            print(lock_key)
+            items_to_add = []
+            for item in items:
+                storage_id = item.get("storageId")
+                if storage_id is None:
+                    continue
+                product_id = item.get("productId")
+                if product_id is None:
+                    continue
+                amount = item.get("quantity")
+                if amount is None:
+                    continue
+                items_to_add.append({
                     "objectID": item.get("productId"),
                     "objectType": "Product",
                     "amount": amount,
                     "storageID": storage_id,
                     "id": "-1"
-                }
-            ]
-            response = bazon_api.add_item_to_document(lock_key, document_id=sale_document.internal_id, items=item_to_add)
-        try:
-            response.raise_for_status()
-        except Exception as error:
-            bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
-            return Response({"Error": "Cant add items"}, status=HTTP_500_INTERNAL_SERVER_ERROR)
-        bazon_api.drop_lock_key(sale_document.internal_id, lock_key)
-        cache.delete(sale_document.number)
-        return Response({"Result": "Ok"}, status=HTTP_200_OK)
+                })
+                item_to_add = [
+                    {
+                        "objectID": item.get("productId"),
+                        "objectType": "Product",
+                        "amount": amount,
+                        "storageID": storage_id,
+                        "id": "-1"
+                    }
+                ]
+                response = bazon_api.add_item_to_document(lock_key, document_id=sale_document.internal_id, items=item_to_add)
+        if response.status_code == 200:
+            return Response({"Result": "Ok"}, status=HTTP_200_OK)
+        self.return_response_error(response)
 
 
 class BazonDeleteItemView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
