@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "celery",
     "bazon",
     "amo",
+    "grappelli",
 ]
 
 MIDDLEWARE = [

@@ -27,6 +27,7 @@ from amo.views import AmoWebhookView
 
 urlpatterns = [
     path("amo-bazon/", include([
+        path("grappelli/", include("grappelli.urls")),
         path("admin/", admin.site.urls),
         path("bazon-sale/<int:amo_id>", BazonSaleView.as_view()),
         path("bazon-sale/<int:amo_id>/detail", BazonSaleProductsView.as_view()),
