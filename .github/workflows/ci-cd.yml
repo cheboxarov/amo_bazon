@@ -1,28 +1,37 @@
-steps:
-  - name: Checkout the repository
-    uses: actions/checkout@v2
+name: CI/CD Pipeline
+on:
+  push:
+    branches:
+      - master
 
-  - name: Deploy to server via SSH
-    uses: appleboy/ssh-action@master
-    with:
-      host: ${{ secrets.SERVER_HOST }}
-      username: ${{ secrets.SERVER_USER }}
-      password: ${{ secrets.SERVER_PASSWORD }}
-      script: |
-        cd /root/amo_bazon
-        git pull origin master
-        docker compose down
-        docker compose pull
-        docker compose up -d --build
-        sleep 10
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v2
 
-        # Проверка статуса приложения Django
-        if [ $(curl -s -o /dev/null -w "%{http_code}" http://localhost:81/) -eq 404 ]; then
-          echo "Контейнер Django запущен успешно"
-        else
-          echo "Контейнер Django не запустился, вывод логов:"
-          docker logs amo_bazon-django-1  # Получение логов контейнера Django
-          echo "Отмена изменений"
-          git reset --hard HEAD
-          exit 1
-        fi
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            cd /root/amo_bazon
+            git pull origin master
+            docker compose down
+            docker compose pull
+            docker compose up -d --build
+            sleep 10
+    
+            # Проверка статуса приложения Django
+            if [ $(curl -s -o /dev/null -w "%{http_code}" http://localhost:81/) -eq 404 ]; then
+              echo "Контейнер Django запущен успешно"
+            else
+              echo "Контейнер Django не запустился, вывод логов:"
+              docker logs amo_bazon-django-1  # Получение логов контейнера Django
+              echo "Отмена изменений"
+              git reset --hard HEAD
+              exit 1
+            fi
