@@ -9,6 +9,9 @@ class AmoAccount(models.Model):
     def __str__(self):
         return self.suburl
 
+    class Meta:
+        verbose_name = "Аккаунт AmoCRM"
+        verbose_name_plural = "Аккаунты AmoCRM"
 
 class Status(models.Model):
     BAZON_STATUSES = [
@@ -26,6 +29,10 @@ class Status(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Статус воронки"
+        verbose_name_plural = "Статусы воронок"
+
 
 class Manager(models.Model):
     name = models.CharField(max_length=255)
@@ -35,3 +42,7 @@ class Manager(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Менеджер"
+        verbose_name_plural = "Менеджеры"

@@ -40,6 +40,9 @@ class BazonAccount(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Аккаунт Bazon"
+        verbose_name_plural = "Аккаунты Bazon"
 
 class SaleDocument(models.Model):
 
@@ -87,6 +90,10 @@ class SaleDocument(models.Model):
     def generate_lock_key(self):
         return self._GenerateLockKey(self)
 
+    class Meta:
+        verbose_name = "Сделка в Bazon"
+        verbose_name_plural = "Сделки в Bazon"
+
 
 class Contractor(models.Model):
     bazon_account = models.ForeignKey(BazonAccount, on_delete=models.CASCADE)
@@ -109,3 +116,7 @@ class Contractor(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Контрагент в Bazon"
+        verbose_name_plural = "Контрагенты в Bazon"
