@@ -16,6 +16,7 @@ class AddSalePaySerializer(serializers.Serializer):
     pay_sum = serializers.FloatField(required=True)
     comment = serializers.CharField(required=False, allow_blank=True)
 
+
 class PayBackSaleSerializer(serializers.Serializer):
     pay_source = serializers.IntegerField(required=True)
     pay_sum = serializers.IntegerField(required=True)

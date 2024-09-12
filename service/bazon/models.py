@@ -12,10 +12,7 @@ class BazonAccount(models.Model):
     def get_api(self) -> Bazon:
         if self.access_token is None or self.refresh_token is None:
             return None
-        bazon = Bazon(self.login,
-                      self.password,
-                      self.refresh_token,
-                      self.access_token)
+        bazon = Bazon(self.login, self.password, self.refresh_token, self.access_token)
         return bazon
 
     def auth(self):
@@ -44,6 +41,7 @@ class BazonAccount(models.Model):
         verbose_name = "Аккаунт Bazon"
         verbose_name_plural = "Аккаунты Bazon"
 
+
 class SaleDocument(models.Model):
 
     bazon_account = models.ForeignKey(BazonAccount, on_delete=models.CASCADE)
@@ -62,7 +60,10 @@ class SaleDocument(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['amo_account', 'internal_id'], name='unique_internal_id_per_amo_account')
+            models.UniqueConstraint(
+                fields=["amo_account", "internal_id"],
+                name="unique_internal_id_per_amo_account",
+            )
         ]
 
     def get_api(self):
@@ -94,6 +95,9 @@ class SaleDocument(models.Model):
         verbose_name = "Сделка в Bazon"
         verbose_name_plural = "Сделки в Bazon"
 
+    def __str__(self):
+        return f"Заявка с Bazon №{self.internal_id}"
+
 
 class Contractor(models.Model):
     bazon_account = models.ForeignKey(BazonAccount, on_delete=models.CASCADE)
@@ -111,7 +115,9 @@ class Contractor(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['amo_account', 'internal_id'], name='unique_internal_id_per_amo'),
+            models.UniqueConstraint(
+                fields=["amo_account", "internal_id"], name="unique_internal_id_per_amo"
+            ),
         ]
 
     def __str__(self):

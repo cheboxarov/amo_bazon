@@ -6,8 +6,15 @@ admin.site.register(BazonAccount)
 
 @admin.register(SaleDocument)
 class SaleDocumentAdmin(admin.ModelAdmin):
-    list_display = ('internal_id', 'amo_account', "bazon_account", "status", "amo_lead_id")
+    list_display = (
+        "internal_id",
+        "amo_account",
+        "bazon_account",
+        "status",
+        "amo_lead_id",
+    )
+
 
 @admin.register(Contractor)
 class ContractorAdmin(admin.ModelAdmin):
-    list_display = ('internal_id', 'amo_account', 'name')
+    list_display = ("internal_id", "amo_account", "name")

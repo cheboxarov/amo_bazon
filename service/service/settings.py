@@ -9,10 +9,12 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
-
+from .log_config import configure_logger
 from pathlib import Path
 import environ
 from celery.schedules import crontab
+
+configure_logger()
 
 env = environ.Env()
 
@@ -37,16 +39,9 @@ SQL_DEBUG = False
 
 if SQL_DEBUG:
     LOGGING = {
-        'version': 1,
-        'handlers': {
-            'console':  {'class': 'logging.StreamHandler'}
-        },
-        'loggers': {
-            'django.db.backends': {
-                'handlers': ['console'],
-                'level': 'DEBUG'
-            }
-        }
+        "version": 1,
+        "handlers": {"console": {"class": "logging.StreamHandler"}},
+        "loggers": {"django.db.backends": {"handlers": ["console"], "level": "DEBUG"}},
     }
 
 # Application definition

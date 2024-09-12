@@ -37,13 +37,12 @@ def sale_documents_polling():
                     continue
                 json_document["bazon_account"] = bazon_account
                 if SaleDocument.objects.filter(
-                    internal_id=json_document["internal_id"],
-                    amo_account=amo_account
+                    internal_id=json_document["internal_id"], amo_account=amo_account
                 ).exists():
                     # Проверяем существует ли сделка в бд, если да - проверяем изменена она или нет.
                     sale_document = SaleDocument.objects.get(
                         internal_id=json_document["internal_id"],
-                        amo_account=amo_account
+                        amo_account=amo_account,
                     )
                     document_dict = model_to_dict(sale_document)
                     document_dict.pop("id")
@@ -60,7 +59,9 @@ def sale_documents_polling():
                         on_update_sale_document(json_document, amo_account)
                     continue
                 try:
-                    SaleDocument.objects.create(**json_document, amo_account=amo_account)
+                    SaleDocument.objects.create(
+                        **json_document, amo_account=amo_account
+                    )
                 except:
                     pass
                 on_create_sale_document(
@@ -86,8 +87,7 @@ def contractors_polling():
                 contractor_json["internal_id"] = contractor_json.pop("id")
                 contractor_json["bazon_account"] = bazon_account
                 contractor_query = Contractor.objects.filter(
-                    internal_id=contractor_json["internal_id"],
-                    amo_account=amo_account
+                    internal_id=contractor_json["internal_id"], amo_account=amo_account
                 )
                 if contractor_query.exists():
                     # Проверяем существует ли сделка в бд, если да - проверяем изменена она или нет.
@@ -107,7 +107,9 @@ def contractors_polling():
                         on_update_contractor(contractor_json, amo_account)
                     continue
 
-                contractor = Contractor.objects.create(**contractor_json, amo_account=amo_account)
+                contractor = Contractor.objects.create(
+                    **contractor_json, amo_account=amo_account
+                )
                 on_create_contractor(
                     contractor_json, amo_account
                 )  # документ летит в событие

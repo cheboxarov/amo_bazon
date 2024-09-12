@@ -3,7 +3,6 @@ import requests
 from typing import Collection
 
 
-
 class Bazon:
 
     def __init__(
@@ -279,57 +278,61 @@ class Bazon:
         response = requests.get(url, params=params, headers=self._headers)
         return response
 
-    def get_items(self, offset: int = 0, limit: int = 250, category_id: int = 1, storages_ids=None, with_reverses: bool = True, search: str = None):
+    def get_items(
+        self,
+        offset: int = 0,
+        limit: int = 250,
+        category_id: int = 1,
+        storages_ids=None,
+        with_reverses: bool = True,
+        search: str = None,
+    ):
 
         if storages_ids is None:
             storages_ids = [1, 2, 3]
         data = {
-            "request":
-                {
-                    "getProducts":
-                        {
-                            "offset":offset,
-                            "limit":limit,
-                            "sorter":
-                                [
-                                    ["id","desc"]
-                                ],
-                            "calcFoundRows":True,
-                            "filter":[],
-                            "categoryID":category_id,
-                            "viewMode":"category-1",
-                            "storagesFilter":
-                                {
-                                    "withReserves":with_reverses,
-                                    "storagesIds":storages_ids,
-                                    "byStoragesRemnants":{}
-                                },
-                            "a11yGridSearchOn":1,"_":""
-                        }
-                },
-            "meta":
-                {
-                    "tabUID":"2024-09-02-05-15-36-410-034606",
-                    "appVersion":"20240416064347",
-                    "isFreezed":False,
-                    "frontendApiVersion":"3.1",
-                    "requestPrepareTime":
-                        {
-                            "sentAt":"function Date() {\\n    [native code]\\n}",
-                            "startedAt":0.038,
-                            "tokenRefreshedAt":None
-                        }
+            "request": {
+                "getProducts": {
+                    "offset": offset,
+                    "limit": limit,
+                    "sorter": [["id", "desc"]],
+                    "calcFoundRows": True,
+                    "filter": [],
+                    "categoryID": category_id,
+                    "viewMode": "category-1",
+                    "storagesFilter": {
+                        "withReserves": with_reverses,
+                        "storagesIds": storages_ids,
+                        "byStoragesRemnants": {},
+                    },
+                    "a11yGridSearchOn": 1,
+                    "_": "",
                 }
+            },
+            "meta": {
+                "tabUID": "2024-09-02-05-15-36-410-034606",
+                "appVersion": "20240416064347",
+                "isFreezed": False,
+                "frontendApiVersion": "3.1",
+                "requestPrepareTime": {
+                    "sentAt": "function Date() {\\n    [native code]\\n}",
+                    "startedAt": 0.038,
+                    "tokenRefreshedAt": None,
+                },
+            },
         }
 
         if search is not None:
             data["request"]["getProducts"]["searchByPartNumber"] = search
 
-        response = requests.post('https://kontrabaz.baz-on.ru/frontend-api/?getProducts', json=data, headers=self._headers)
+        response = requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?getProducts",
+            json=data,
+            headers=self._headers,
+        )
         return response
 
     def add_item_to_document(self, lockKey: str, document_id: int, items: list[dict]):
-
         """
         {
                                         "id":-1,
@@ -354,34 +357,32 @@ class Bazon:
         """
 
         data = {
-            "request":
-                {
-                    "saleAddItems":
-                        {
-                            "bufferItems":
-                                items,
-                            "documentID":document_id,
-                            "lockKey":lockKey,
-                            "_":""
-                        }
-                },
-            "meta":
-                {
-                    "tabUID":"2024-09-02-05-15-36-410-034606",
-                    "appVersion":"20240416064347",
-                    "isFreezed":False,
-                    "frontendApiVersion":"3.1",
-                    "requestPrepareTime":
-                        {
-                            "sentAt":"function Date() {\\n    [native code]\\n}",
-                            "startedAt":0.003,
-                            "tokenRefreshedAt":None
-                        }
+            "request": {
+                "saleAddItems": {
+                    "bufferItems": items,
+                    "documentID": document_id,
+                    "lockKey": lockKey,
+                    "_": "",
                 }
+            },
+            "meta": {
+                "tabUID": "2024-09-02-05-15-36-410-034606",
+                "appVersion": "20240416064347",
+                "isFreezed": False,
+                "frontendApiVersion": "3.1",
+                "requestPrepareTime": {
+                    "sentAt": "function Date() {\\n    [native code]\\n}",
+                    "startedAt": 0.003,
+                    "tokenRefreshedAt": None,
+                },
+            },
         }
 
-        response = requests.post('https://kontrabaz.baz-on.ru/frontend-api/?saleAddItems',
-                                 headers=self._headers, json=data)
+        response = requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?saleAddItems",
+            headers=self._headers,
+            json=data,
+        )
         return response
 
     def drop_lock_key(self, document_id: id, lock_key: str):
@@ -390,16 +391,20 @@ class Bazon:
                 "dropDocumentLock": {
                     "documentID": document_id,
                     "lockKey": lock_key,
-                    "_": ""
+                    "_": "",
                 }
             }
         }
 
-        response = requests.post("https://kontrabaz.baz-on.ru/frontend-api/?dropDocumentLock", headers=self._headers, json=data)
+        response = requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?dropDocumentLock",
+            headers=self._headers,
+            json=data,
+        )
         return response
 
     def get_document_items_by_buffer(self, items: list[dict]):
-        """ items
+        """items
         [
             {
                 "objectID":3479,
@@ -413,33 +418,28 @@ class Bazon:
             }
         ],"""
         data = {
-            "request":
-                {
-                    "getDocumentItemsByBuffer":
-                        {
-                            "bufferItems":
-                                items,
-                            "viewMode":"sale",
-                            "_":""
-                        }
-                },
-            "meta":
-                {
-                    "tabUID":"2024-09-03-03-39-50-654-045684",
-                    "appVersion":"20240416064347",
-                    "isFreezed":False,
-                    "frontendApiVersion":"3.1",
-                    "requestPrepareTime":
-                        {
-                            "sentAt":"function Date() {\\n    [native code]\\n}",
-                            "startedAt":0.003,
-                            "tokenRefreshedAt":None
-                        }
+            "request": {
+                "getDocumentItemsByBuffer": {
+                    "bufferItems": items,
+                    "viewMode": "sale",
+                    "_": "",
                 }
+            },
+            "meta": {
+                "tabUID": "2024-09-03-03-39-50-654-045684",
+                "appVersion": "20240416064347",
+                "isFreezed": False,
+                "frontendApiVersion": "3.1",
+                "requestPrepareTime": {
+                    "sentAt": "function Date() {\\n    [native code]\\n}",
+                    "startedAt": 0.003,
+                    "tokenRefreshedAt": None,
+                },
+            },
         }
 
         response = requests.post(
-            'https://kontrabaz.baz-on.ru/frontend-api/?getDocumentItemsByBuffer',
+            "https://kontrabaz.baz-on.ru/frontend-api/?getDocumentItemsByBuffer",
             headers=self._headers,
             json=data,
         )
@@ -448,36 +448,37 @@ class Bazon:
     def remove_document_items(self, document_id: int, lock_key: str, items: list[int]):
 
         data = {
-            "request":
-                {
-                    "saleRemoveItems":
-                        {
-                            "itemsIDs":items,
-                            "documentID":document_id,
-                            "lockKey":lock_key,
-                            "_":""
-                        }
-                },
-            "meta":
-                {
-                    "tabUID":"2024-09-03-04-37-29-349-255981",
-                    "appVersion":"20240416064347",
-                    "isFreezed":False,
-                    "frontendApiVersion":"3.1",
-                    "requestPrepareTime":
-                        {
-                            "sentAt":"function Date() {\\n    [native code]\\n}",
-                            "startedAt":0.001,
-                            "tokenRefreshedAt":None
-                        }
+            "request": {
+                "saleRemoveItems": {
+                    "itemsIDs": items,
+                    "documentID": document_id,
+                    "lockKey": lock_key,
+                    "_": "",
                 }
+            },
+            "meta": {
+                "tabUID": "2024-09-03-04-37-29-349-255981",
+                "appVersion": "20240416064347",
+                "isFreezed": False,
+                "frontendApiVersion": "3.1",
+                "requestPrepareTime": {
+                    "sentAt": "function Date() {\\n    [native code]\\n}",
+                    "startedAt": 0.001,
+                    "tokenRefreshedAt": None,
+                },
+            },
         }
 
-        response = requests.post('https://kontrabaz.baz-on.ru/frontend-api/?saleRemoveItems',
-                                 headers=self._headers, json=data)
+        response = requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?saleRemoveItems",
+            headers=self._headers,
+            json=data,
+        )
         return response
 
-    def _sale_move(self, document_id: int, lock_key: str, method: str) -> requests.Response:
+    def _sale_move(
+        self, document_id: int, lock_key: str, method: str
+    ) -> requests.Response:
         data = {
             "request": {
                 method: {
@@ -486,7 +487,11 @@ class Bazon:
                 }
             }
         }
-        return requests.post(f"https://kontrabaz.baz-on.ru/frontend-api/?{method}", headers=self._headers, json=data)
+        return requests.post(
+            f"https://kontrabaz.baz-on.ru/frontend-api/?{method}",
+            headers=self._headers,
+            json=data,
+        )
 
     def sale_reserve(self, document_id: int, lock_key: str):
         return self._sale_move(document_id, lock_key, "saleReserve")
@@ -497,25 +502,39 @@ class Bazon:
     def generate_lock_key(self, document_number: str):
         response = self.set_lock_key(document_number)
         response.raise_for_status()
-        lock_key = response.json().get("response", {}).get("setDocumentLock", {}).get("lockKey")
+        lock_key = (
+            response.json()
+            .get("response", {})
+            .get("setDocumentLock", {})
+            .get("lockKey")
+        )
         return lock_key
 
-    def add_sale_pay(self, document_id: int, lock_key: str, pay_source: int, pay_sum: float, comment: str = ""):
+    def add_sale_pay(
+        self,
+        document_id: int,
+        lock_key: str,
+        pay_source: int,
+        pay_sum: float,
+        comment: str = "",
+    ):
         payload = {
             "request": {
                 "salePay": {
-                    "sumByPaySources": {
-                        str(pay_source): str(pay_sum)
-                    },
+                    "sumByPaySources": {str(pay_source): str(pay_sum)},
                     "sum": str(pay_sum),
                     "comment": comment,
                     "documentID": document_id,
-                    "lockKey": lock_key
+                    "lockKey": lock_key,
                 }
             }
         }
 
-        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?salePay", headers=self._headers, json=payload)
+        return requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?salePay",
+            headers=self._headers,
+            json=payload,
+        )
 
     def get_pay_sources(self):
 
@@ -523,29 +542,27 @@ class Bazon:
             "request": {
                 "getPaySources": {
                     "viewMode": "raw",
-                    "where": {
-                        "type": ["cash", "bank"]
-                    },
-                    "sorter": {
-                        "sorter": "asc"
-                    }
+                    "where": {"type": ["cash", "bank"]},
+                    "sorter": {"sorter": "asc"},
                 }
             }
         }
 
-        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getPaySources", headers=self._headers, json=payload)
+        return requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?getPaySources",
+            headers=self._headers,
+            json=payload,
+        )
 
     def get_paid_sources(self, document_id: int):
 
-        payload = {
-            "request": {
-                "getDocumentPaidSources": {
-                    "documentID": document_id
-                }
-            }
-        }
+        payload = {"request": {"getDocumentPaidSources": {"documentID": document_id}}}
 
-        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getDocumentPaidSources", headers=self._headers, json=payload)
+        return requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?getDocumentPaidSources",
+            headers=self._headers,
+            json=payload,
+        )
 
     def sale_pay_back(self, document_id: int, lock_key: str, pay_source: int, sum: int):
 
@@ -558,9 +575,13 @@ class Bazon:
                     "sum": sum,
                     "comment": "",
                     "documentID": document_id,
-                    "lockKey": lock_key
+                    "lockKey": lock_key,
                 }
             }
         }
 
-        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?saleRefund", headers=self._headers, json=payload)
+        return requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?saleRefund",
+            headers=self._headers,
+            json=payload,
+        )

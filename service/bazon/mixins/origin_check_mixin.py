@@ -1,5 +1,6 @@
 from rest_framework.exceptions import APIException
 
+
 class OriginCheckMixin:
 
     def check_origin(self, request):
