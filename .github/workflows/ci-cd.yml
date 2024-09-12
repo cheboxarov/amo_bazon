@@ -33,5 +33,8 @@ jobs:
               docker logs amo_bazon-django-1  # Получение логов контейнера Django
               echo "Отмена изменений"
               git reset --hard HEAD
+              docker compose down
+              docker compose pull
+              docker compose up -d --build
               exit 1
             fi

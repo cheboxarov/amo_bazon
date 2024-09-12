@@ -23,7 +23,7 @@ from bazon.views import (
     BazonSalesListView,
     BazonItemsListView,
     BazonItemsAddView,
-    BazonDeletetemView,
+    BazonDeleteItemView,
     BazonDealOrdersView,
     BazonMoveSaleView,
     BazonAddSalePayView,
