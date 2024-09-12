@@ -32,7 +32,7 @@ jobs:
               echo "Контейнер Django не запустился, вывод логов:"
               docker logs amo_bazon-django-1  # Получение логов контейнера Django
               echo "Отмена изменений"
-              git reset --hard HEAD
+              git revert HEAD --no-edit
               docker compose down
               docker compose pull
               docker compose up -d --build
