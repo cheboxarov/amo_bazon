@@ -1,4 +1,6 @@
 import json
+import uuid
+
 import requests
 from typing import Collection
 
@@ -114,21 +116,21 @@ class Bazon:
 
     def create_sale(
         self,
-        sum: int,
-        type: str,
-        state: str,
-        contractor_id: int,
-        storage_id: int,
-        shipment_id: int,
-        transport_id: int,
-        manager_comment: str,
-        paid: int,
-        number: int,
-        id: str,
-        sum_full: int,
-        manager_id: int,
         source: str,
+        manager_id: int,
+        storage_id: int,
+        sum: int = 0,
+        type: str = "sale",
+        state: str = "draft",
+        contractor_id: int = 0,
+        shipment_id: int = 0,
+        transport_id: int = 0,
+        manager_comment: str = "",
+        paid: int = 0,
+        number: int = 0,
+        sum_full: int = 0,
     ):
+        id = str(uuid.uuid4())[:23]
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
             "request": {
