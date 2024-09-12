@@ -24,3 +24,25 @@ jobs:
             docker compose down
             docker compose pull
             docker compose up -d --build
+            
+            # Ожидание запуска контейнера Django
+            max_attempts=10
+            attempt=0
+            container_name=amo_bazon-django-1
+
+            until [ $attempt -ge $max_attempts ]; do
+              if [ $(docker ps -q -f name=$container_name) ]; then
+                echo "Контейнер Django запущен успешно"
+                break
+              fi
+              echo "Ожидание запуска контейнера Django..."
+              sleep 10
+              attempt=$((attempt + 1))
+            done
+
+            # Проверка статуса контейнера после ожидания
+            if [ $attempt -eq $max_attempts ]; then
+              echo "Контейнер Django не запустился, отменяю изменения"
+              git reset --hard HEAD
+              exit 1
+            fi
