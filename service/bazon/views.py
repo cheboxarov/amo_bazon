@@ -575,9 +575,8 @@ class BazonCreateDealView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
             return self.return_response_error(response)
         document_json["internal_id"] = document_json.pop("id")
         SaleDocument.objects.create(
-            **document_json, amo_account=amo_account
+            **document_json, amo_account=amo_account, amo_lead_id=amo_lead_id
         )
-        on_create_sale_document(document_json, amo_account, amo_lead_id=amo_lead_id)
 
         return Response(status=HTTP_204_NO_CONTENT)
 

@@ -8,15 +8,13 @@ from bazon.models import SaleDocument
 def on_create_sale_document(
     sale_data: dict,
     amo_account: AmoAccount,
-    amo_lead_id: int = None
 ):
     serializer = BazonSaleToAmoLeadSerializer(amo_account, sale_data)
     serializer.serialize()
     serialized_data = serializer.get_serialized_data(with_id=False)
-    if amo_account is not None:
-        amo_client = DealClient(amo_account.token, amo_account.suburl)
-        response = amo_client.create_deal(**serialized_data)
-        amo_lead_id = response["_embedded"]["leads"][0]["id"]
+    amo_client = DealClient(amo_account.token, amo_account.suburl)
+    response = amo_client.create_deal(**serialized_data)
+    amo_lead_id = response["_embedded"]["leads"][0]["id"]
     sale_document = SaleDocument.objects.get(
         internal_id=sale_data["internal_id"], amo_account=amo_account
     )
