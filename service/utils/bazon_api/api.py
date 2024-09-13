@@ -4,6 +4,8 @@ import uuid
 import requests
 from typing import Collection
 
+from urllib3 import request
+
 
 class Bazon:
 
@@ -586,4 +588,37 @@ class Bazon:
             "https://kontrabaz.baz-on.ru/frontend-api/?saleRefund",
             headers=self._headers,
             json=payload,
+        )
+
+    def get_sources(self):
+        payload = {
+            "request": {
+                "getSaleSourcesReference": {
+                    "where": {
+                        "isArchive": 0
+                    }
+                }
+            }
+        }
+
+        return requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?getSaleSourcesReference",
+            json=payload,
+            headers=self._headers
+        )
+
+    def get_storages(self):
+
+        payload = {
+            "request": {
+                "getStoragesReference:full":{
+                    "_": ""
+                }
+            }
+        }
+
+        return requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?getStoragesReference",
+            json=payload,
+            headers=self._headers
         )
