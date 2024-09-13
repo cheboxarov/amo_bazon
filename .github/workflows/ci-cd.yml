@@ -31,15 +31,13 @@ jobs:
             docker compose up -d --build
             sleep 10
             
-            # Проверка статуса приложения Django
             if [ $(curl -s -o /dev/null -w "%{http_code}" http://localhost:81/) -eq 404 ]; then
               echo "Контейнер Django запущен успешно"
             else
               echo "Контейнер Django не запустился вывод логов:"
-              docker logs amo_bazon-django-1  # Получение логов контейнера Django
+              docker logs amo_bazon-django-1
               echo "Отмена изменений"
               
-              # Возврат к последнему рабочему коммиту
               git reset --hard $last_commit
               
               docker compose down
