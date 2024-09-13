@@ -581,6 +581,7 @@ class BazonCreateDealView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         SaleDocument.objects.create(
             internal_id=document_json.get("internal_id"),
             bazon_account=amo_account.bazon_accounts.first(),
+            number=document_json.get("number"),
             amo_account=amo_account,
             amo_lead_id=amo_lead_id
         )
