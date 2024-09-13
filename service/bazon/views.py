@@ -577,7 +577,7 @@ class BazonManagersView(CustomAPIView, BazonApiMixin):
         if response.status_code != 200:
             logger.warning(f"[{subdomain}] При получении менеджеров Bazon ответил ошибкой ({response.status_code})")
             return self.return_response_error(response)
-        logger.info(f"[{subdomain}] Запрос на получение менеджеров обработан.")
+        logger.info(f"[{subdomain}] Запрос на получение менеджеров обрsаботан.")
         return Response(response.json().get("response", {})
                         .get("getUsersReference", {})
                         .get("UsersReference", {}),

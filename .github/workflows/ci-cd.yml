@@ -19,12 +19,18 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             cd /root/amo_bazon
+            
+            # Сохранение текущих изменений
+            git stash || echo "No changes to stash"
+            
+            # Обновление кода
             git pull origin master
+            
             docker compose down
             docker compose pull
             docker compose up -d --build
             sleep 10
-    
+            
             # Проверка статуса приложения Django
             if [ $(curl -s -o /dev/null -w "%{http_code}" http://localhost:81/) -eq 404 ]; then
               echo "Контейнер Django запущен успешно"
@@ -32,9 +38,12 @@ jobs:
               echo "Контейнер Django не запустился, вывод логов:"
               docker logs amo_bazon-django-1  # Получение логов контейнера Django
               echo "Отмена изменений"
-              git revert HEAD --no-edit
+              git revert HEAD --no-edit || echo "No changes to revert"
               docker compose down
               docker compose pull
               docker compose up -d --build
               exit 1
             fi
+            
+            # Восстановление изменений, если они были
+            git stash pop || echo "No changes to restore"
