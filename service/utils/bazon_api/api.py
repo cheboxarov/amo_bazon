@@ -210,7 +210,7 @@ class Bazon:
                     "_": "",
                 }
             }
-        }error
+        }
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
