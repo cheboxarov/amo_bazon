@@ -573,7 +573,7 @@ class BazonCreateDealView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
             logger.error(f"[{subdomain}] Bazon ответил ошибкой при попытке создания сделки ({response.status_code})")
             return self.return_response_error(response)
 
-        document_json = request.data.get("response", {}).get("saleCreate", {}).get("Document")
+        document_json = response.json().get("response", {}).get("saleCreate", {}).get("Document")
         if document_json is None:
             logger.error(f"[{subdomain}] Не вышло получить сделку при создании {response.json()}")
             return self.return_response_error(response)
