@@ -565,7 +565,7 @@ class BazonCreateDealView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         manager = validated_data.get("manager")
         amo_lead_id = validated_data.get("amoLeadId")
 
-        response = api.create_sale(f"id:{source}", manager, storage, comment=comment)
+        response = api.create_sale(f"id:{source}", manager, storage, manager_comment=comment)
 
         if response.status_code != 200:
             return self.return_response_error(response)
