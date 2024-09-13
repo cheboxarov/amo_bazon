@@ -9,7 +9,7 @@ services:
   django:
     restart: always
     build: ./service
-    command: sh -c "gunicorn --bind 0.0.0.0:8000 service.wsgi:application"
+    command: sh -c "gunicorn --bind 0.0.0.0:8000 service.wsgi:application --workers 10"
     #command: sh -c "python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./service:/service
