@@ -34,6 +34,6 @@ urlpatterns = [
         BazonGetPaidSourcesView.as_view(),
     ),
     path("bazon-sale/<int:amo_lead_id>/pay-back", BazonSalePayBack.as_view()),
-    path("bazon-sale/<int:amo_lead_id>/storages", BazonStoragesView.as_view()),
-    path("bazon-sale/<int:amo_lead_id>/sources", BazonSourcesView.as_view())
+    path("storages", BazonStoragesView.as_view()),
+    path("sources", BazonSourcesView.as_view())
 ]

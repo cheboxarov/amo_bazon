@@ -497,13 +497,11 @@ class BazonSalePayBack(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
 class BazonSourcesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
-    def get(self, request, amo_lead_id):
+    def get(self, request):
         subdomain = self.check_origin(request)
         logger.info(f"[{subdomain}] Запрос на получение источников заявок.")
-
-        sale_document = self.get_sale_document(amo_lead_id)
-        api = sale_document.get_api()
-
+        amo_account = AmoAccount.objects.get(suburl=subdomain)
+        api = amo_account.bazon_accounts.first().get_api()
         response = api.get_sources()
 
         if response.status_code != 200:
@@ -521,13 +519,12 @@ class BazonSourcesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
 class BazonStoragesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
-    def get(self, request, amo_lead_id):
+    def get(self, request):
 
         subdomain = self.check_origin(request)
         logger.info(f"[{subdomain}] Запрос на получение складов.")
-
-        sale_document = self.get_sale_document(amo_lead_id)
-        api = sale_document.get_api()
+        amo_account = AmoAccount.objects.get(suburl=subdomain)
+        api = amo_account.bazon_accounts.first().get_api()
 
         response = api.get_storages()
         if response.status_code != 200:
