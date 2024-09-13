@@ -35,7 +35,7 @@ jobs:
             if [ $(curl -s -o /dev/null -w "%{http_code}" http://localhost:81/) -eq 404 ]; then
               echo "Контейнер Django запущен успешно"
             else
-              echo "Контейнер Django не запустился, вывод логов:"
+              echo "Контейнер Django не запустился вывод логов:"
               docker logs amo_bazon-django-1  # Получение логов контейнера Django
               echo "Отмена изменений"
               
