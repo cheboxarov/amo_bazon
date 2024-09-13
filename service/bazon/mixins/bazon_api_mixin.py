@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 import requests
-from loguru import loger
+from loguru import loge
 
 
 class BazonApiMixin:
