@@ -20,8 +20,8 @@ jobs:
           script: |
             cd /root/amo_bazon
             
-            # Сохранение текущих изменений
-            git stash || echo "No changes to stash"
+            # Получение хеша последнего рабочего коммита
+            last_commit=$(git rev-parse HEAD)
             
             # Обновление кода
             git pull origin master
@@ -38,12 +38,12 @@ jobs:
               echo "Контейнер Django не запустился, вывод логов:"
               docker logs amo_bazon-django-1  # Получение логов контейнера Django
               echo "Отмена изменений"
-              git revert HEAD --no-edit || echo "No changes to revert"
+              
+              # Возврат к последнему рабочему коммиту
+              git reset --hard $last_commit
+              
               docker compose down
               docker compose pull
               docker compose up -d --build
               exit 1
             fi
-            
-            # Восстановление изменений, если они были
-            git stash pop || echo "No changes to restore"
