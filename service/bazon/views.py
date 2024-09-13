@@ -1,6 +1,7 @@
 import time
 from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.serializers import serialize
 from django.middleware.csrf import CsrfViewMiddleware
 from rest_framework.response import Response
 from rest_framework.status import *
@@ -12,6 +13,7 @@ from .serializers import (
     BazonSaleDocumentSerializer,
     AddSalePaySerializer,
     PayBackSaleSerializer,
+    CreateSaleSerializer
 )
 from amo.models import AmoAccount
 from utils.serializers.bazon_serializers import ItemsListSerializer
@@ -538,3 +540,45 @@ class BazonStoragesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
             .get("StoragesReference", {}),
             status=HTTP_200_OK
         )
+
+
+class BazonCreateDealView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
+
+    def post(self, request):
+
+        subdomain = self.check_origin(request)
+        amo_account = AmoAccount.objects.get(suburl=subdomain)
+        logger.info(f"[{subdomain}] Запрос на создание сделки.")
+        api: Bazon = amo_account.bazon_accounts.first().get_api()
+
+        data = request.data
+        serializer = CreateSaleSerializer(data)
+        if not serializer.is_valid():
+            logger.error(f"[{subdomain}] Ошибка валидации запроса: {serializer.errors}")
+            return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+        validated_data = serializer.validated_data
+        comment = validated_data.get("comment")
+        source = validated_data.get("source")
+        storage = validated_data.get("storage")
+
+        #response = api.create_sale(source, )
+        return Response(status=HTTP_204_NO_CONTENT)
+
+
+class BazonManagersView(CustomAPIView, BazonApiMixin):
+
+    def get(self, request):
+        subdomain = self.check_origin(request)
+        logger.info(f"[{subdomain}] Запрос на получение менеджеров.")
+        amo_account = AmoAccount.objects.get(suburl=subdomain)
+        api: Bazon = amo_account.bazon_accounts.first().get_api()
+        response = api.get_managers()
+        if response.status_code != 200:
+            logger.warning(f"[{subdomain}] При получении менеджеров Bazon ответил ошибкой ({response.status_code})")
+            return self.return_response_error(response)
+        logger.info(f"[{subdomain}] Запрос на получение менеджеров обработан.")
+        return Response(response.json().get("response", {})
+                        .get("getUsersReference", {})
+                        .get("UsersReference", {}),
+                        status=HTTP_200_OK)

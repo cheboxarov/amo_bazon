@@ -20,3 +20,9 @@ class AddSalePaySerializer(serializers.Serializer):
 class PayBackSaleSerializer(serializers.Serializer):
     pay_source = serializers.IntegerField(required=True)
     pay_sum = serializers.IntegerField(required=True)
+
+
+class CreateSaleSerializer(serializers.Serializer):
+    comment = serializers.CharField(required=True)
+    source = serializers.CharField(required=True)
+    storage = serializers.IntegerField(required=True)

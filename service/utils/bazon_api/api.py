@@ -210,7 +210,7 @@ class Bazon:
                     "_": "",
                 }
             }
-        }
+        }error
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
@@ -608,3 +608,15 @@ class Bazon:
             json=payload,
             headers=self._headers,
         )
+
+    def get_managers(self):
+
+        payload = {
+            "request": {
+                "getUsersReference":  {
+                    "_": ""
+                }
+            }
+        }
+
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getUsersReference", json=payload, headers=self._headers)
