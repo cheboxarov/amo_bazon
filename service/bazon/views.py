@@ -561,8 +561,13 @@ class BazonCreateDealView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         comment = validated_data.get("comment")
         source = validated_data.get("source")
         storage = validated_data.get("storage")
+        manager = validated_data.get("manager")
 
-        #response = api.create_sale(source, )
+        response = api.create_sale(f"id:{source}", manager, storage, comment=comment)
+
+        if response.status_code != 200:
+            return self.return_response_error(response)
+
         return Response(status=HTTP_204_NO_CONTENT)
 
 

@@ -26,3 +26,4 @@ class CreateSaleSerializer(serializers.Serializer):
     comment = serializers.CharField(required=True)
     source = serializers.CharField(required=True)
     storage = serializers.IntegerField(required=True)
+    manager = serializers.IntegerField(required=True)

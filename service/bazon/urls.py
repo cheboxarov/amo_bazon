@@ -14,7 +14,8 @@ from .views import (
     BazonSalePayBack,
     BazonSourcesView,
     BazonStoragesView,
-    BazonManagersView
+    BazonManagersView,
+    BazonCreateDealView
 )
 
 urlpatterns = [
@@ -37,5 +38,6 @@ urlpatterns = [
     path("bazon-sale/<int:amo_lead_id>/pay-back", BazonSalePayBack.as_view()),
     path("storages", BazonStoragesView.as_view()),
     path("sources", BazonSourcesView.as_view()),
-    path("managers", BazonManagersView.as_view())
+    path("managers", BazonManagersView.as_view()),
+    path("create-sale-document", BazonCreateDealView.as_view())
 ]
