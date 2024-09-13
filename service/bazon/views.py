@@ -553,7 +553,7 @@ class BazonCreateDealView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         api: Bazon = amo_account.bazon_accounts.first().get_api()
 
         data = request.data
-        serializer = CreateSaleSerializer(data)
+        serializer = CreateSaleSerializer(data=data)
         if not serializer.is_valid():
             logger.error(f"[{subdomain}] Ошибка валидации запроса: {serializer.errors}")
             return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
