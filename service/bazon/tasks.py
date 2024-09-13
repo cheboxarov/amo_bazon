@@ -66,9 +66,7 @@ def sale_documents_polling():
                     pass
                 on_create_sale_document(
                     json_document, amo_account
-                )  # документ летит в событие
-
-                # Отправка сделки в амо CRM
+                )
 
 
 @shared_task

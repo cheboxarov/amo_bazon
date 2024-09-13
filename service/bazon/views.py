@@ -8,6 +8,7 @@ from rest_framework.status import *
 from rest_framework.views import APIView
 from loguru import logger
 from utils.bazon_api import Bazon
+from .events import on_create_sale_document
 from .models import SaleDocument, BazonAccount
 from .serializers import (
     BazonSaleDocumentSerializer,
@@ -562,11 +563,21 @@ class BazonCreateDealView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         source = validated_data.get("source")
         storage = validated_data.get("storage")
         manager = validated_data.get("manager")
+        amo_lead_id = validated_data.get("amoLeadId")
 
         response = api.create_sale(f"id:{source}", manager, storage, comment=comment)
 
         if response.status_code != 200:
             return self.return_response_error(response)
+
+        document_json = request.data.get("response", {}).get("saleCreate", {}).get("Document")
+        if document_json is None:
+            return self.return_response_error(response)
+        document_json["internal_id"] = document_json.pop("id")
+        SaleDocument.objects.create(
+            **document_json, amo_account=amo_account
+        )
+        on_create_sale_document(document_json, amo_account, amo_lead_id=amo_lead_id)
 
         return Response(status=HTTP_204_NO_CONTENT)
 

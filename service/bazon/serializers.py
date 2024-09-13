@@ -27,3 +27,4 @@ class CreateSaleSerializer(serializers.Serializer):
     source = serializers.CharField(required=True)
     storage = serializers.IntegerField(required=True)
     manager = serializers.IntegerField(required=True)
+    amoLeadId = serializers.IntegerField(required=True)
