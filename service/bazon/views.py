@@ -567,6 +567,8 @@ class BazonCreateDealView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
         response = api.create_sale(f"id:{source}", manager, storage, manager_comment=comment)
 
+        logger.debug(f"Ответ от базона при создании сделки: {response}")
+
         if response.status_code != 200:
             logger.error(f"[{subdomain}] Bazon ответил ошибкой при попытке создания сделки ({response.status_code})")
             return self.return_response_error(response)
