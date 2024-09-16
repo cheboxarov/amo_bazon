@@ -312,7 +312,7 @@ class BazonMoveSaleView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
                 f"{subdomain}: BazonMoveSaleView - Ошибка: Необходимо указать состояние"
             )
             return Response({"Error": "Need state"}, status=HTTP_400_BAD_REQUEST)
-        if state not in ["reserve", "cancel", "recreate"]:
+        if state not in ["reserve", "cancel", "recreate", "issue"]:
             logger.error(
                 f"{subdomain}: BazonMoveSaleView - Ошибка: Неверное состояние {state}"
             )
@@ -342,6 +342,8 @@ class BazonMoveSaleView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
                 response = bazon_api.cancel_sale(sale_document.internal_id, lock_key)
             if state == "recreate":
                 response = bazon_api.sale_recreate(sale_document.internal_id, lock_key)
+            if state == "issue":
+                response = bazon_api.sale_issue(sale_document.internal_id, lock_key)
 
         if response.status_code == 200:
             logger.info(f"{subdomain}: BazonMoveSaleView - Сделка успешно перемещена")
@@ -618,8 +620,19 @@ class BazonPrintFromView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 
         response = api.get_form_print(sale_document.internal_id)
         if response.status_code != 200:
+            log = f"[{subdomain}] Bazon ответил ошибкой на получение чека и накладной {response.status_code}"
+            try:
+                log += f"\n {response.json()}"
+            except:
+                pass
+            logger.warning(log)
             return self.return_response_error(response)
         html = response.json().get("response", {}).get("getDocumentFormPrint", {}).get("html")
         if html is None:
+            log = f"[{subdomain}] Bazon ответил ошибкой на получение чека и накладной {response.status_code}"
+            try:
+                log += f"\n {response.json()}"
+            except:
+                pass
             return self.return_response_error(response)
         return Response({"html": html}, status=HTTP_200_OK)

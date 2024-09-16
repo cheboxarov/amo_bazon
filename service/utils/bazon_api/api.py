@@ -503,6 +503,9 @@ class Bazon:
     def sale_cancel(self, document_id: int, lock_key: str):
         return self._sale_move(document_id, lock_key, "saleCancel")
 
+    def sale_issue(self, document_id: int, lock_key: str):
+        return self._sale_move(document_id, lock_key, "saleIssue")
+
     def generate_lock_key(self, document_number: str):
         response = self.set_lock_key(document_number)
         response.raise_for_status()
