@@ -1,4 +1,5 @@
 from rest_framework.exceptions import APIException
+from amo.models import AmoAccount
 
 
 class OriginCheckMixin:
@@ -10,4 +11,7 @@ class OriginCheckMixin:
         origin_parts = origin.split("//")[-1].split(".")
         if len(origin_parts) < 1:
             raise APIException("Bad origin", code=400)
-        return origin_parts[0]
+        subdomain = origin_parts[0]
+        if not AmoAccount.objects.filter(suburl=subdomain).exists():
+            raise APIException("bad_amo_account")
+        return subdomain

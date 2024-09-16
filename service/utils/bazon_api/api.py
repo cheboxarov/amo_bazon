@@ -249,7 +249,6 @@ class Bazon:
             "request": {
                 "saleEditData": {
                     "Document": {
-                        "id": id,
                         **data_to_edit,
                     },
                     "documentID": id,
@@ -614,25 +613,24 @@ class Bazon:
 
     def get_managers(self):
 
-        payload = {
-            "request": {
-                "getUsersReference":  {
-                    "_": ""
-                }
-            }
-        }
+        payload = {"request": {"getUsersReference": {"_": ""}}}
 
-        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getUsersReference", json=payload, headers=self._headers)
+        return requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?getUsersReference",
+            json=payload,
+            headers=self._headers,
+        )
 
     def get_form_print(self, document_id: int, print_type: str = "default"):
 
         payload = {
             "request": {
-                "getDocumentFormPrint": {
-                    "id": document_id,
-                    "printType": print_type
-                }
+                "getDocumentFormPrint": {"id": document_id, "printType": print_type}
             }
         }
 
-        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getDocumentFormPrint", headers=self._headers, json=payload)
+        return requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?getDocumentFormPrint",
+            headers=self._headers,
+            json=payload,
+        )

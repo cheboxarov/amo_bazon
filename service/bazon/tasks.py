@@ -64,9 +64,7 @@ def sale_documents_polling():
                     )
                 except:
                     pass
-                on_create_sale_document(
-                    json_document, amo_account
-                )
+                on_create_sale_document(json_document, amo_account)
 
 
 @shared_task
