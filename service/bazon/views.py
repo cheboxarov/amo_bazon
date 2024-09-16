@@ -673,7 +673,7 @@ class BazonSaleEditView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 
         with sale_document.generate_lock_key() as lock_key:
             response = api.edit_sale(sale_document.internal_id, request.POST, lock_key)
-            logger.debug(f"[{subdomain}] Базон ответил на изменение сделки {response.json()}")
+            logger.debug(f"[{subdomain}] Базон ответил на изменение сделки {response.json()} \n Тело запроса: {request.POST}")
 
         if response.status_code != 200:
             return self.return_response_error(response)
