@@ -619,7 +619,7 @@ class BazonPrintFromView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         response = api.get_form_print(sale_document.internal_id)
         if response.status_code != 200:
             return self.return_response_error(response)
-        html = response.json().get("response", {}).get("getDocumentFromPrint", {}).get("html")
+        html = response.json().get("response", {}).get("getDocumentFormPrint", {}).get("html")
         if html is None:
             return self.return_response_error(response)
         return Response({"html": html}, status=HTTP_200_OK)
