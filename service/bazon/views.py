@@ -605,3 +605,21 @@ class BazonManagersView(CustomAPIView, BazonApiMixin):
                         .get("getUsersReference", {})
                         .get("UsersReference", {}),
                         status=HTTP_200_OK)
+
+
+class BazonPrintFromView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
+
+    def get(self, request, amo_lead_id):
+
+        subdomain = self.check_origin(request)
+        logger.info(f"[{subdomain}] Запрос на получения чека и накладной.")
+        sale_document = self.get_sale_document(amo_lead_id)
+        api = sale_document.get_api()
+
+        response = api.get_form_print(sale_document.internal_id)
+        if response.status_code != 200:
+            return self.return_response_error(response)
+        html = response.json().get("response", {}).get("getDocumentFromPrint", {}).get("html")
+        if html is None:
+            return self.return_response_error(response)
+        return Response({"html": html}, status=HTTP_200_OK)

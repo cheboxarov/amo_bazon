@@ -620,3 +620,16 @@ class Bazon:
         }
 
         return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getUsersReference", json=payload, headers=self._headers)
+
+    def get_form_print(self, document_id: int, print_type: str = "default"):
+
+        payload = {
+            "request": {
+                "getDocumentFormPrint": {
+                    "id": document_id,
+                    "printType": print_type
+                }
+            }
+        }
+
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getDocumentFormPrint", headers=self._headers, json=payload)
