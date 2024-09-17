@@ -14,6 +14,7 @@ class SaleDocumentAdmin(admin.ModelAdmin):
         "status",
         "amo_lead_id",
     )
+    list_filter = ("amo_account",)
 
 
 @admin.register(Contractor)
