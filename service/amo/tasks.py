@@ -8,7 +8,6 @@ def sync_amo_data():
     for amo_account in AmoAccount.objects.all():
         client = AmoCRMClient(token=amo_account.token, subdomain=amo_account.suburl)
 
-        # Синхронизация статусов
         statuses_data = client.get_statuses()
         existing_status_ids = Status.objects.filter(
             amo_account=amo_account
@@ -16,14 +15,12 @@ def sync_amo_data():
 
         for pipeline in statuses_data["_embedded"]["pipelines"]:
             for status_data in pipeline["_embedded"]["statuses"]:
-                # Используем filter вместо get, чтобы избежать MultipleObjectsReturned
                 status_queryset = Status.objects.filter(
-                    amo_id=status_data["id"], amo_account=amo_account
+                    amo_id=status_data["id"], amo_account=amo_account, pipeline_id=pipeline.get("id")
                 )
                 if status_queryset.exists():
-                    # Обновление всех найденных записей (если их несколько)
                     status_queryset.update(
-                        name=f'{status_data["name"]} ({pipeline["name"]})'
+                        name=f'{status_data["name"]}'
                     )
                 else:
                     # Добавление нового статуса
@@ -31,9 +28,9 @@ def sync_amo_data():
                         amo_id=status_data["id"],
                         name=f'{status_data["name"]} ({pipeline["name"]})',
                         amo_account=amo_account,
+                        pipeline_id=pipeline.get("id")
                     )
 
-        # Удаление статусов, которых больше нет в amoCRM
         Status.objects.filter(amo_account=amo_account).exclude(
             amo_id__in=[
                 s["id"]
@@ -42,7 +39,6 @@ def sync_amo_data():
             ]
         ).delete()
 
-        # Синхронизация менеджеров
         managers_data = client.get_managers()
         existing_manager_ids = Manager.objects.filter(
             amo_account=amo_account

@@ -23,6 +23,8 @@ class Status(models.Model):
 
     amo_id = models.IntegerField(verbose_name="ID в AmoCRM")
     name = models.CharField(max_length=255, verbose_name="Имя")
+    pipeline_name = models.PositiveBigIntegerField(verbose_name="Название воронки")
+    pipeline_id = models.PositiveBigIntegerField(verbose_name="Айди воронки")
     bazon_status = models.CharField(max_length=20, choices=BAZON_STATUSES, blank=True, null=True, verbose_name="Статус в Bazon")
     amo_account = models.ForeignKey(AmoAccount, on_delete=models.CASCADE, related_name='statuses', verbose_name="Аккаунт в AmoCRM")
 
@@ -32,6 +34,9 @@ class Status(models.Model):
     class Meta:
         verbose_name = "Статус воронки"
         verbose_name_plural = "Статусы воронок"
+        constraints = [
+            models.UniqueConstraint(fields=['pipeline_id', 'amo_id'], name="unique_pipeline_id_amo_id")
+        ]
 
 
 class Manager(models.Model):

@@ -653,6 +653,7 @@ class BazonPrintFromView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
             except json.JSONDecodeError:
                 pass
             logger.error(log)
+            return self.return_response(response)
         return Response({"html": html})
 
 
