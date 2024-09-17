@@ -1,15 +1,9 @@
-import json
-import time
-from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.serializers import serialize
-from django.middleware.csrf import CsrfViewMiddleware
 from rest_framework.response import Response
 from rest_framework.status import *
 from rest_framework.views import APIView
 from loguru import logger
 from utils.bazon_api import Bazon
-from .events import on_create_sale_document
 from .models import SaleDocument, BazonAccount
 from .serializers import (
     BazonSaleDocumentSerializer,
@@ -19,7 +13,6 @@ from .serializers import (
 )
 from amo.models import AmoAccount
 from utils.serializers.bazon_serializers import ItemsListSerializer
-import hashlib
 from .mixins import OriginCheckMixin, SaleDocumentMixin, BazonApiMixin
 import json
 
@@ -43,7 +36,7 @@ class BazonSaleView(CustomAPIView, SaleDocumentMixin):
         return Response(serializer.data, status=HTTP_200_OK)
 
 
-class BazonSaleDetailView(CustomAPIView, SaleDocumentMixin):
+class BazonSaleDetailView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
     def get(self, request, amo_id):
         subdomain = self.check_origin(request)
@@ -70,7 +63,7 @@ class BazonSaleDetailView(CustomAPIView, SaleDocumentMixin):
             return Response(validated_data, status=HTTP_200_OK)
 
         logger.error(f"{subdomain}: BazonSaleDetailView - Ошибка подключения к Bazon")
-        return Response({"Error": "Cant connect to bazon"}, status=HTTP_200_OK)
+        return self.return_response(response)
 
 
 class BazonSalesListView(CustomAPIView):
@@ -223,12 +216,12 @@ class BazonItemsAddView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
             logger.info(
                 f"{subdomain}: BazonItemsAddView - Успешное добавление элементов"
             )
-            return Response({"Result": "Ok"}, status=HTTP_200_OK)
+            return self.return_response(response)
 
         logger.error(
             f"{subdomain}: BazonItemsAddView - Ошибка при добавлении элементов: {response.status_code}"
         )
-        return self.return_response_error(response)
+        return self.return_response(response)
 
 
 class BazonDeleteItemView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
@@ -264,12 +257,12 @@ class BazonDeleteItemView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
                 logger.info(
                     f"{subdomain}: BazonDeleteItemView - Успешное удаление элемента"
                 )
-                return Response({"Result": "ok"}, status=HTTP_200_OK)
+                return self.return_response(response)
 
         logger.error(
             f"{subdomain}: BazonDeleteItemView - Ошибка при удалении элемента: {response.status_code}"
         )
-        return self.return_response_error(response)
+        return self.return_response(response)
 
 
 class BazonDealOrdersView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
@@ -298,7 +291,7 @@ class BazonDealOrdersView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         logger.error(
             f"{subdomain}: BazonDealOrdersView - Ошибка при получении заказов: {response.status_code}"
         )
-        return self.return_response_error(response)
+        return self.return_response(response)
 
 
 class BazonMoveSaleView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
@@ -349,12 +342,12 @@ class BazonMoveSaleView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
         if response.status_code == 200:
             logger.info(f"{subdomain}: BazonMoveSaleView - Сделка успешно перемещена")
-            return Response({"Result": "Moved"}, status=HTTP_200_OK)
+            return self.return_response(response)
 
         logger.error(
             f"{subdomain}: BazonMoveSaleView - Ошибка при перемещении сделки: {response.status_code}"
         )
-        return self.return_response_error(response)
+        return self.return_response(response)
 
 
 class BazonAddSalePayView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
@@ -393,12 +386,12 @@ class BazonAddSalePayView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
             logger.info(
                 f"{subdomain}: BazonAddSalePayView - Успешная обработка платежа"
             )
-            return Response({"result": "ok"}, status=HTTP_200_OK)
+            return self.return_response(response)
 
         logger.error(
             f"{subdomain}: BazonAddSalePayView - Ошибка при обработке платежа: {response.status_code}"
         )
-        return self.return_response_error(response)
+        return self.return_response(response)
 
 
 class BazonGetPaySourcesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
@@ -428,7 +421,7 @@ class BazonGetPaySourcesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         logger.error(
             f"{subdomain}: BazonGetPaySourcesView - Ошибка при получении источников платежей: {response.status_code}"
         )
-        return self.return_response_error(response)
+        return self.return_response(response)
 
 
 class BazonGetPaidSourcesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
@@ -459,7 +452,7 @@ class BazonGetPaidSourcesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         logger.error(
             f"{subdomain}: Ошибка при получении источников платежей для сделки {amo_lead_id}"
         )
-        return self.return_response_error(response)
+        return self.return_response(response)
 
 
 class BazonSalePayBack(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
@@ -499,7 +492,7 @@ class BazonSalePayBack(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         logger.error(
             f"{subdomain}: BazonSalePayBack - Ошибка при обработке: {response.status_code}"
         )
-        return self.return_response_error(response)
+        return self.return_response(response)
 
 
 class BazonSourcesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
@@ -515,7 +508,7 @@ class BazonSourcesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
             logger.error(
                 f"[{subdomain}] Bazon ответил ошибкой при получении источников ({response.status_code})"
             )
-            return self.return_response_error(response)
+            return self.return_response(response)
 
         data = response.json()
         logger.info(f"[{subdomain}] Запрос на получение источников обработан.")
@@ -541,7 +534,7 @@ class BazonStoragesView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
             logger.error(
                 f"[{subdomain}] Bazon ответил ошибкой при попытке получить склады ({response.status_code})"
             )
-            return self.return_response_error(response)
+            return self.return_response(response)
 
         data = response.json()
         return Response(
@@ -584,7 +577,7 @@ class BazonCreateDealView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
             logger.error(
                 f"[{subdomain}] Bazon ответил ошибкой при попытке создания сделки ({response.status_code})"
             )
-            return self.return_response_error(response)
+            return self.return_response(response)
 
         document_json = (
             response.json().get("response", {}).get("saleCreate", {}).get("Document")
@@ -593,7 +586,7 @@ class BazonCreateDealView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
             logger.error(
                 f"[{subdomain}] Не вышло получить сделку при создании {response.json()}"
             )
-            return self.return_response_error(response)
+            return self.return_response(response)
         document_json["internal_id"] = document_json.pop("id")
         SaleDocument.objects.create(
             internal_id=document_json.get("internal_id"),
@@ -603,7 +596,7 @@ class BazonCreateDealView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
             amo_lead_id=amo_lead_id,
         )
 
-        return Response(status=HTTP_204_NO_CONTENT)
+        return self.return_response(response)
 
 
 class BazonManagersView(CustomAPIView, BazonApiMixin):
@@ -618,7 +611,7 @@ class BazonManagersView(CustomAPIView, BazonApiMixin):
             logger.warning(
                 f"[{subdomain}] При получении менеджеров Bazon ответил ошибкой ({response.status_code})"
             )
-            return self.return_response_error(response)
+            return self.return_response(response)
         logger.info(f"[{subdomain}] Запрос на получение менеджеров обрsаботан.")
         return Response(
             response.json()
@@ -645,8 +638,8 @@ class BazonPrintFromView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
                 log += f"\n {response.json()}"
             except json.JSONDecodeError:
                 pass
-            logger.warning(log)
-            return self.return_response_error(response)
+            logger.error(log)
+            return self.return_response(response)
         html = (
             response.json()
             .get("response", {})
@@ -659,8 +652,8 @@ class BazonPrintFromView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
                 log += f"\n {response.json()}"
             except json.JSONDecodeError:
                 pass
-            return self.return_response_error(response)
-        return Response({"html": html}, status=HTTP_200_OK)
+            logger.error(log)
+        return self.return_response(response)
 
 
 class BazonSaleEditView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
@@ -675,7 +668,4 @@ class BazonSaleEditView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
             response = api.edit_sale(sale_document.internal_id, request.data, lock_key)
             logger.debug(f"[{subdomain}] Базон ответил на изменение сделки {response.json()} \n Тело запроса: {request.data}")
 
-        if response.status_code != 200:
-            return self.return_response_error(response)
-
-        return Response({"Result": "ok"}, status=HTTP_200_OK)
+        return self.return_response(response)

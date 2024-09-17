@@ -1,11 +1,13 @@
 from rest_framework.response import Response
 import requests
-from loguru import logger
+import json
 
 
 class BazonApiMixin:
-    def return_response_error(self, response: requests.Response):
+
+    @staticmethod
+    def return_response(response: requests.Response):
         try:
             return Response(response.json(), status=response.status_code)
-        except:
+        except json.JSONDecodeError:
             return Response({"Error": "bazon_api_error"}, status=response.status_code)
