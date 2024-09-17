@@ -20,7 +20,8 @@ def sync_amo_data():
                 )
                 if status_queryset.exists():
                     status_queryset.update(
-                        name=f'{status_data["name"]}'
+                        name=f'{status_data["name"]}',
+                        pipeline_name=pipeline.get("name")
                     )
                 else:
                     # Добавление нового статуса
@@ -28,7 +29,8 @@ def sync_amo_data():
                         amo_id=status_data["id"],
                         name=f'{status_data["name"]} ({pipeline["name"]})',
                         amo_account=amo_account,
-                        pipeline_id=pipeline.get("id")
+                        pipeline_id=pipeline.get("id"),
+                        pipeline_name=pipeline.get("name")
                     )
 
         Status.objects.filter(amo_account=amo_account).exclude(
