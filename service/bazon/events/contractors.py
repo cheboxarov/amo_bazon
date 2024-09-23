@@ -39,9 +39,9 @@ def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_a
             ]
         })
     amo_config = json.loads(amo_account.config)
-    if (contact_phone_field := amo_config.get("contact_phone_field")) != 0:
+    if contact_phone_field := amo_config.get("contact_phone_field") and contractor.phone != "":
         append_value(contact_phone_field, contractor.phone)
-    if (contact_email_id := amo_config.get("contact_email_id")) != 0:
+    if (contact_email_id := amo_config.get("contact_email_field")) and contractor.email != "":
         append_value(contact_email_id, contractor.email)
     try:
         amo_contact = (api.create_contact(contractor.name, custom_fields=custom_fields)
