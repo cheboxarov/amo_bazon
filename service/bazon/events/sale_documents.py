@@ -26,7 +26,10 @@ def on_create_sale_document(
     if sale_document.contractor_id:
         api = sale_document.get_api()
         contractor_response = api.get_contractor(sale_document.contractor_id)
-        contractor_json = contractor_response.json().get("response", {}).get("getContractor", {}).get("Contractor")
+        contractor_json = (contractor_response.json()
+                           .get("response", {})
+                           .get("getContractor", {})
+                           .get("Contractor"))
         if contractor_json is None:
             return
         query = Contractor.objects.filter(internal_id=sale_document.contractor_id)
