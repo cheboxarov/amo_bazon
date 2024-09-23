@@ -53,6 +53,7 @@ class SaleDocument(models.Model):
     sum = models.PositiveIntegerField(null=True, blank=True)
     storage_id = models.PositiveIntegerField(null=True, blank=True)
     contractor_id = models.PositiveIntegerField(null=True, blank=True)
+    contractor_linked = models.BooleanField(default=False)
     contractor_name = models.CharField(max_length=255, null=True, blank=True)
     manager_id = models.PositiveIntegerField(null=True, blank=True)
     manager_name = models.CharField(max_length=255, null=True, blank=True)

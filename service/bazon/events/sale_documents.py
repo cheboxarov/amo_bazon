@@ -2,7 +2,7 @@ from utils.serializers import BazonSaleToAmoLeadSerializer
 from bazon.models import BazonAccount
 from amo.models import AmoAccount
 from amo.amo_client import DealClient
-from bazon.models import SaleDocument
+from bazon.models import SaleDocument, Contractor
 
 
 def on_create_sale_document(
@@ -21,6 +21,16 @@ def on_create_sale_document(
     sale_document.amo_lead_id = amo_lead_id
     sale_document.amo_account = amo_account
     sale_document.save()
+
+    if sale_document.contractor_id:
+        api = sale_document.get_api()
+        contractor_response = api.get_contractor(sale_document.contractor_id)
+        contractor_json = contractor_response.json().get("response", {}).get("getContractor", {}).get("Contractor")
+        if contractor_json is None:
+            return
+        query = Contractor.objects.filter(internal_id=sale_document.contractor_id)
+        if not query.exists():
+            pass
 
 
 def on_update_sale_document(sale_data: dict, amo_account: AmoAccount):

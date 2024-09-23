@@ -281,6 +281,20 @@ class Bazon:
         response = requests.get(url, params=params, headers=self._headers)
         return response
 
+    def get_contractor(self, contractor_id: int):
+
+        payload = {
+            "request": {
+                "getContractor": {
+                    "id": contractor_id
+                }
+            }
+        }
+
+        url = "https://kontrabaz.baz-on.ru/frontend-api/?getContractor"
+
+        return requests.post(url, json=payload, headers=self._headers)
+
     def get_items(
         self,
         offset: int = 0,
