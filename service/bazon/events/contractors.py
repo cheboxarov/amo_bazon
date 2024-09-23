@@ -4,6 +4,7 @@ from bazon.models import Contractor, BazonAccount
 from amo.models import AmoAccount
 from pydantic import BaseModel, Field
 from loguru import logger
+import json
 
 
 class _Contractor(BaseModel):
@@ -37,9 +38,10 @@ def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_a
                 }
             ]
         })
-    if amo_account.config.get("contact_phone_field") != 0:
-        append_value(amo_account.config.get("contact_phone_field"), contractor.phone)
-    if (contact_email_id := amo_account.config.get("contact_email_id")) != 0:
+    amo_config = json.loads(amo_account.config)
+    if (contact_phone_field := amo_config.get("contact_phone_field")) != 0:
+        append_value(contact_phone_field, contractor.phone)
+    if (contact_email_id := amo_config.get("contact_email_id")) != 0:
         append_value(contact_email_id, contractor.email)
     try:
         amo_contact = (api.create_contact(contractor.name, 0, custom_fields=custom_fields)
