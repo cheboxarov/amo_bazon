@@ -44,7 +44,7 @@ def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_a
         amo_contact = (api.create_contact(contractor.name, 0, custom_fields=custom_fields)
                        .get("_embedded",{})).get("contacts", [None])[0]
     except Exception as error:
-        logger.error(f"Error create contac: {error}")
+        print(f"Error create contac: {error}")
         return
     if amo_contact is None:
         return
