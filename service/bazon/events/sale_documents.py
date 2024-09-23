@@ -26,7 +26,6 @@ def on_create_sale_document(
     if sale_document.contractor_id:
         api = sale_document.get_api()
         contractor_response = api.get_contractor(sale_document.contractor_id)
-        print(contractor_response, contractor_response.json())
         contractor_json = (contractor_response.json()
                            .get("response", {})
                            .get("getContractor", {})
