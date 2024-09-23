@@ -70,6 +70,7 @@ def sale_documents_polling():
 
 @shared_task
 def contractors_polling():
+    return
     for bazon_account in BazonAccount.objects.all():
         bazon_api = Bazon(
             login=bazon_account.login,
