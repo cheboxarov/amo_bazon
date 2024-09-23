@@ -44,11 +44,11 @@ def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_a
     if (contact_email_id := amo_config.get("contact_email_id")) != 0:
         append_value(contact_email_id, contractor.email)
     try:
-        amo_contact = (api.create_contact(contractor.name, 0, custom_fields=custom_fields)
+        amo_contact = (api.create_contact(contractor.name, custom_fields=custom_fields)
                        .get("_embedded",{})).get("contacts", [None])[0]
         print(amo_contact)
     except Exception as error:
-        print(f"Error create contac: {error}")
+        print(f"Error create contac: {error} {custom_fields}")
         return
     if amo_contact is None:
         return

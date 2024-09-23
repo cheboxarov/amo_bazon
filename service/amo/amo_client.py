@@ -93,10 +93,12 @@ class ContactClient(AmoCRMClient):
     """
 
     def create_contact(
-        self, name, responsible_user_id, custom_fields=None, company_id=None
+        self, name, responsible_user_id = None, custom_fields=None, company_id=None
     ):
         url = f"{self.base_url}/contacts"
-        data = {"name": name, "responsible_user_id": responsible_user_id}
+        data = {"name": name}
+        if responsible_user_id:
+            data["responsible_user_id"] = responsible_user_id
         if custom_fields:
             data["custom_fields_values"] = custom_fields
         if company_id:
