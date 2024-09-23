@@ -3,6 +3,7 @@ from bazon.models import BazonAccount
 from amo.models import AmoAccount
 from amo.amo_client import DealClient
 from bazon.models import SaleDocument, Contractor
+from .contractors import on_create_contractor
 
 
 def on_create_sale_document(
@@ -30,7 +31,12 @@ def on_create_sale_document(
             return
         query = Contractor.objects.filter(internal_id=sale_document.contractor_id)
         if not query.exists():
-            pass
+            on_create_contractor(contractor_json,
+                                 bazon_account=sale_document.bazon_account,
+                                 amo_account=sale_document.amo_account)
+        if not query.exists():
+            return
+        contractor = query.first()
 
 
 def on_update_sale_document(sale_data: dict, amo_account: AmoAccount):
