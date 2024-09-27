@@ -47,8 +47,8 @@ class AmoCRMClient:
         to_type - leads | contacts | companies | customers | catalog_elements
         """
         payload = {
-            "to_entity_id": to_id,
-            "to_entity_type": to_type
+            "to_entity_id": [to_id],
+            "to_entity_type": [to_type]
         }
         if metadata:
             payload["metadata"] = LinkMetadataModel.model_validate(metadata).model_dump()
