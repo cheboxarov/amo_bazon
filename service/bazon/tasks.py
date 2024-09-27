@@ -8,9 +8,11 @@ from .events import (
     on_create_contractor,
     on_update_contractor,
 )
+from utils.transaction import transaction_decorator
 
 
 @shared_task
+@transaction_decorator
 def sale_documents_polling():
 
     for bazon_account in BazonAccount.objects.all():
@@ -28,7 +30,7 @@ def sale_documents_polling():
             bazon_account.refresh_auth()
             return
         for amo_account in bazon_account.amo_accounts.all():
-            data = response.json()
+            data: dict[str, list[dict[str, dict[str, list]]]] = response.json()
             for json_document in data["response"][0]["result"]["sale_documents"]:
                 try:
                     json_document["internal_id"] = json_document.pop("id")
@@ -39,7 +41,6 @@ def sale_documents_polling():
                 if SaleDocument.objects.filter(
                     internal_id=json_document["internal_id"], amo_account=amo_account
                 ).exists():
-                    # Проверяем существует ли сделка в бд, если да - проверяем изменена она или нет.
                     sale_document = SaleDocument.objects.get(
                         internal_id=json_document["internal_id"],
                         amo_account=amo_account,
@@ -52,19 +53,12 @@ def sale_documents_polling():
                     document_dict.pop("contractor_linked")
                     json_document.pop("bazon_account")
                     if document_dict != json_document:
-                        # Если сделка с апи отличается от той что в бд - актуализируем ее
                         for key, value in json_document.items():
                             if document_dict[key] != value:
                                 setattr(sale_document, key, value)
                         sale_document.save()
                         on_update_sale_document(json_document, amo_account)
                     continue
-                try:
-                    SaleDocument.objects.create(
-                        **json_document, amo_account=amo_account
-                    )
-                except:
-                    pass
                 on_create_sale_document(json_document, amo_account)
 
 

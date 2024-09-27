@@ -4,13 +4,15 @@ from amo.models import AmoAccount
 from amo.amo_client import DealClient
 from bazon.models import SaleDocument, Contractor
 from .contractors import on_create_contractor
+from utils.transaction import transaction_decorator
 
 
+@transaction_decorator
 def on_create_sale_document(
     sale_data: dict,
     amo_account: AmoAccount,
 ):
-    SaleDocument.objects.create(
+    sale_document = SaleDocument.objects.create(
                         **sale_data, amo_account=amo_account
                     )
     serializer = BazonSaleToAmoLeadSerializer(amo_account, sale_data)
@@ -19,9 +21,6 @@ def on_create_sale_document(
     amo_client = DealClient(amo_account.token, amo_account.suburl)
     response = amo_client.create_deal(**serialized_data)
     amo_lead_id = response["_embedded"]["leads"][0]["id"]
-    sale_document = SaleDocument.objects.get(
-        internal_id=sale_data["internal_id"], amo_account=amo_account
-    )
     sale_document.amo_lead_id = amo_lead_id
     sale_document.amo_account = amo_account
     sale_document.save()
@@ -45,7 +44,7 @@ def on_create_sale_document(
             return
         contractor = query.first()
 
-
+@transaction_decorator
 def on_update_sale_document(sale_data: dict, amo_account: AmoAccount):
     print(f"Deal updated: {sale_data}")
     serializer = BazonSaleToAmoLeadSerializer(amo_account, sale_data)

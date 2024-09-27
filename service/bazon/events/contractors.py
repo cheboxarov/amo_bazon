@@ -20,7 +20,6 @@ class _Contractor(BaseModel):
     balance: int
 
 
-@transaction_decorator
 def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_account: BazonAccount):
     if Contractor.objects.filter(internal_id=contractor_data.get("id")).exists():
         return
