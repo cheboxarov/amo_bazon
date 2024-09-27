@@ -48,6 +48,8 @@ class DealClient(AmoCRMClient):
             data["custom_fields_values"] = custom_fields
 
         response = requests.post(url, headers=self._get_headers(), json=[data])
+        if response.status_code != 200:
+            print(response.json())
         response.raise_for_status()
         return response.json()
 

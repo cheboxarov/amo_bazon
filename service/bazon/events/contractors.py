@@ -5,6 +5,7 @@ from amo.models import AmoAccount
 from pydantic import BaseModel, Field
 from loguru import logger
 import json
+from utils.transaction import transaction_decorator
 
 
 class _Contractor(BaseModel):
@@ -19,7 +20,7 @@ class _Contractor(BaseModel):
     balance: int
 
 
-
+@transaction_decorator
 def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_account: BazonAccount):
     if Contractor.objects.filter(internal_id=contractor_data.get("id")).exists():
         return
@@ -48,7 +49,7 @@ def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_a
                        .get("_embedded",{})).get("contacts", [None])[0]
         print(amo_contact)
     except Exception as error:
-        print(f"Error create contac: {error} {custom_fields}")
+        print(f"Error create contact: {error} {custom_fields}")
         return
     if amo_contact is None:
         return
