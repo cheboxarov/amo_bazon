@@ -21,7 +21,7 @@ class _Contractor(BaseModel):
 
 
 def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_account: BazonAccount):
-    if Contractor.objects.filter(internal_id=contractor_data.get("id")).exists():
+    if Contractor.objects.filter(internal_id=contractor_data.get("id"), amo_account=amo_account).exists():
         return
     print(_Contractor.model_validate(contractor_data).model_dump())
     contractor = Contractor.objects.create(amo_account=amo_account,
