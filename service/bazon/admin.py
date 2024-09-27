@@ -19,5 +19,5 @@ class SaleDocumentAdmin(admin.ModelAdmin):
 
 @admin.register(Contractor)
 class ContractorAdmin(admin.ModelAdmin):
-    list_display = ("internal_id", "amo_account", "name", "amo_id")
-    list_filter = ("amo_id",)
+    list_display = ("internal_id", "amo_account", "name", "amo_id", "amo_account")
+    list_filter = ("amo_account",)
