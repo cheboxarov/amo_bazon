@@ -55,7 +55,7 @@ services:
       - "6379:6379"
     command: sh -c "redis-server --appendonly yes"
 
-  celery_worker:
+  sale_polling:
     restart: always
     build: ./service
     command: python manage.py sale_documents_polling
