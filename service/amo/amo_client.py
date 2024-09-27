@@ -52,7 +52,7 @@ class AmoCRMClient:
         }
         if metadata:
             payload["metadata"] = LinkMetadataModel.model_validate(metadata).model_dump()
-        return self.session.post(f"{self.account_url}/{e_type}/{e_id}/link", json=payload)
+        return self.session.post(f"{self.base_url}/{e_type}/{e_id}/link", json=payload)
 
 
 class DealClient(AmoCRMClient):
