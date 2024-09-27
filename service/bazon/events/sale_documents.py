@@ -29,16 +29,13 @@ def on_create_sale_document(
                            .get("response", {})
                            .get("getContractor", {})
                            .get("Contractor"))
-        print(contractor_json)
         if contractor_json is None:
             return
-        query = Contractor.objects.filter(internal_id=sale_document.contractor_id)
+        query = Contractor.objects.filter(internal_id=sale_document.contractor_id, amo_account=amo_account)
         if not query.exists():
             on_create_contractor(contractor_json,
                                  bazon_account=sale_document.bazon_account,
                                  amo_account=sale_document.amo_account)
-        if not query.exists():
-            return
         contractor = query.first()
 
 def on_update_sale_document(sale_data: dict, amo_account: AmoAccount):
