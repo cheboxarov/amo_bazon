@@ -17,20 +17,6 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
-from bazon.views import (
-    BazonSaleView,
-    BazonSaleDetailView,
-    BazonSalesListView,
-    BazonItemsListView,
-    BazonItemsAddView,
-    BazonDeleteItemView,
-    BazonDealOrdersView,
-    BazonMoveSaleView,
-    BazonAddSalePayView,
-    BazonGetPaySourcesView,
-    BazonGetPaidSourcesView,
-    BazonSalePayBack,
-)
 from amo.views import AmoWebhookView
 
 

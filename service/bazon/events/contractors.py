@@ -23,7 +23,7 @@ class _Contractor(BaseModel):
 def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_account: BazonAccount):
     if Contractor.objects.filter(internal_id=contractor_data.get("id"), amo_account=amo_account).exists():
         return
-    print(_Contractor.model_validate(contractor_data).model_dump())
+    logger.debug(f"contractor_data: {_Contractor.model_validate(contractor_data).model_dump()}")
     contractor = Contractor.objects.create(amo_account=amo_account,
                                            **_Contractor.model_validate(contractor_data).model_dump(),
                                            bazon_account=bazon_account)
@@ -43,12 +43,13 @@ def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_a
         append_value(contact_phone_field, contractor.phone)
     if (contact_email_id := amo_config.get("contact_email_field")) and contractor.email != "":
         append_value(contact_email_id, contractor.email)
+    logger.debug(f"Перед созданием контакта, данные: {contractor.name} , {custom_fields}")
     try:
         amo_contact = (api.create_contact(contractor.name, custom_fields=custom_fields)
                        .get("_embedded",{})).get("contacts", [None])[0]
-        print(amo_contact)
+        logger.debug(f"Создан контакт {amo_contact}")
     except Exception as error:
-        print(f"Error create contact: {error} {custom_fields}")
+        logger.error(f"Error create contact: {error} {custom_fields}")
         return
     if amo_contact is None:
         return
