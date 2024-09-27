@@ -13,12 +13,12 @@ class LinkMetadataModel(BaseModel):
 
 class AmoCRMClient:
 
-    BASE_URL = "https://{}.amocrm.ru/api/v4"
+    AMO_API_URL = "https://{}.amocrm.ru/api/v4"
 
     def __init__(self, token, subdomain):
         self.token = token
         self.subdomain = subdomain
-        self.account_url = self.BASE_URL.format(self.subdomain)
+        self.base_url = self.AMO_API_URL.format(self.subdomain)
         self.session = requests.Session()
         self.session.headers = self._get_headers()
 
