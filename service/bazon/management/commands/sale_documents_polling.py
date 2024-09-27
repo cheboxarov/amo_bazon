@@ -7,6 +7,7 @@ from bazon.events import (
     on_update_sale_document,
 )
 from django.db import transaction
+from django.core.management.base import BaseCommand
 
 
 
