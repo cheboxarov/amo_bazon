@@ -6,6 +6,7 @@ from bazon.models import SaleDocument, Contractor
 from .contractors import on_create_contractor
 from django.db import transaction
 from loguru import logger
+from amo.amo_client import AmoCRMClient
 
 
 def create_deal(sale_data: dict, amo_account: AmoAccount):
@@ -48,7 +49,20 @@ def on_create_sale_document(
             on_create_contractor(contractor_json,
                                 bazon_account=sale_document.bazon_account,
                                 amo_account=sale_document.amo_account)
-        contractor = query.first()
+        contractor: Contractor = query.first()
+        if not contractor.amo_id:
+            return
+        
+        amo_client: AmoCRMClient = amo_account.get_amo_client()
+
+        response = amo_client.link_entity(to_type="contacts",
+                                          to_id=contractor.amo_id,
+                                          e_id=sale_document.amo_lead_id,
+                                          e_type="leads")
+        if response.status_code != 200:
+            logger.error(f"Ошибка в линковке контакта к сделке, ответ от амо: {response.text}")
+            return
+        logger.debug(f"Контакт {contractor.amo_id} прилинкован к сделке {sale_document.amo_lead_id}")
 
 def on_update_sale_document(sale_data: dict, amo_account: AmoAccount):
     print(f"Deal updated: {sale_data}")

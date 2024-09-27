@@ -1,11 +1,26 @@
 import requests
+from typing import Optional
+from pydantic import BaseModel
+
+
+class LinkMetadataModel(BaseModel):
+    catalog_id: Optional[int] = None
+    quantity: Optional[int] = None
+    is_main: Optional[bool] = None
+    updated_by: Optional[int] = None
+    price_id: Optional[int] = None
 
 
 class AmoCRMClient:
+
+    BASE_URL = "https://{}.amocrm.ru/api/v4"
+
     def __init__(self, token, subdomain):
         self.token = token
         self.subdomain = subdomain
-        self.base_url = f"https://{subdomain}.amocrm.ru/api/v4"
+        self.account_url = self.BASE_URL.format(self.subdomain)
+        self.session = requests.Session()
+        self.session.headers = self._get_headers()
 
     def _get_headers(self):
         return {
@@ -25,6 +40,19 @@ class AmoCRMClient:
         response = requests.get(url, headers=self._get_headers())
         response.raise_for_status()
         return response.json()
+    
+    def link_entity(self, to_type: str, to_id: int, e_type: str, e_id: str, metadata: Optional[dict] = None):
+        """
+        e_type - leads | contacts | companies | customers
+        to_type - leads | contacts | companies | customers | catalog_elements
+        """
+        payload = {
+            "to_entity_id": to_id,
+            "to_entity_type": to_type
+        }
+        if metadata:
+            payload["metadata"] = LinkMetadataModel.model_validate(metadata).model_dump()
+        return self.session.post(f"{self.account_url}/{e_type}/{e_id}/link", json=payload)
 
 
 class DealClient(AmoCRMClient):

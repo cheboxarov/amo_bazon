@@ -1,6 +1,6 @@
 import json
-
 from django.db import models
+from .amo_client import AmoCRMClient, DealClient, CompanyClient, ContactClient
 
 
 class AmoAccount(models.Model):
@@ -22,6 +22,18 @@ class AmoAccount(models.Model):
     class Meta:
         verbose_name = "Аккаунт AmoCRM"
         verbose_name_plural = "Аккаунты AmoCRM"
+
+    def get_amo_client(self):
+        return AmoCRMClient(self.token, self.suburl)
+    
+    def get_deal_client(self):
+        return DealClient(self.token, self.suburl)
+    
+    def get_contact_client(self):
+        return ContactClient(self.token, self.suburl)
+    
+    def get_company_client(self):
+        return CompanyClient(self.token, self.suburl)
 
 class Status(models.Model):
     BAZON_STATUSES = [
