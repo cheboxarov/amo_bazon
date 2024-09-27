@@ -43,7 +43,7 @@ class Command(BaseCommand):
                             sale_document, created = SaleDocument.objects.get_or_create(
                                 internal_id=json_document["internal_id"],
                                 amo_account=amo_account,
-                                defaults=json_document  # Если запись не найдена, создается с данными из json_document
+                                defaults=json_document 
                             )
                             
                             if not created:
@@ -62,4 +62,4 @@ class Command(BaseCommand):
                                     sale_document.save()
                                     on_update_sale_document(json_document, amo_account)
                             else:
-                                on_create_sale_document(json_document, amo_account)
+                                on_create_sale_document(json_document, amo_account, sale_document)

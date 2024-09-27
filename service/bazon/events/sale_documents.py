@@ -10,10 +10,8 @@ from utils.transaction import transaction_decorator
 def on_create_sale_document(
     sale_data: dict,
     amo_account: AmoAccount,
+    sale_document: SaleDocument
 ):
-    sale_document = SaleDocument.objects.create(
-                        **sale_data, amo_account=amo_account
-                    )
     serializer = BazonSaleToAmoLeadSerializer(amo_account, sale_data)
     serializer.serialize()
     serialized_data = serializer.get_serialized_data(with_id=False)
