@@ -4,7 +4,6 @@ from amo.models import AmoAccount
 from amo.amo_client import DealClient
 from bazon.models import SaleDocument, Contractor
 from .contractors import on_create_contractor
-from utils.transaction import transaction_decorator
 
 
 def on_create_sale_document(
