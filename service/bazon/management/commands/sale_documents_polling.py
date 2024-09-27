@@ -61,4 +61,4 @@ class Command(BaseCommand):
                                 sale_document.save()
                                 on_update_sale_document(json_document, amo_account)
                         else:
-                            on_create_sale_document(json_document, amo_account, sale_document)
+                            on_create_sale_document(json_document, amo_account)
