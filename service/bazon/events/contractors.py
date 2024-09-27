@@ -29,7 +29,7 @@ def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_a
                                            bazon_account=bazon_account)
     api = ContactClient(amo_account.token, amo_account.suburl)
     custom_fields = []
-    def append_value(field_id, value):
+    def append_value(field_id: int, value: str):
         custom_fields.append({
             "field_id": field_id,
             "values": [
@@ -39,7 +39,7 @@ def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_a
             ]
         })
     amo_config = json.loads(amo_account.config)
-    if contact_phone_field := amo_config.get("contact_phone_field") and contractor.phone != "":
+    if (contact_phone_field := amo_config.get("contact_phone_field")) and contractor.phone != "":
         append_value(contact_phone_field, contractor.phone)
     if (contact_email_id := amo_config.get("contact_email_field")) and contractor.email != "":
         append_value(contact_email_id, contractor.email)
