@@ -7,7 +7,6 @@ from .contractors import on_create_contractor
 from utils.transaction import transaction_decorator
 
 
-@transaction_decorator
 def on_create_sale_document(
     sale_data: dict,
     amo_account: AmoAccount,
@@ -44,7 +43,6 @@ def on_create_sale_document(
             return
         contractor = query.first()
 
-@transaction_decorator
 def on_update_sale_document(sale_data: dict, amo_account: AmoAccount):
     print(f"Deal updated: {sale_data}")
     serializer = BazonSaleToAmoLeadSerializer(amo_account, sale_data)
