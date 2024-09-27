@@ -58,7 +58,7 @@ services:
   celery_worker:
     restart: always
     build: ./service
-    command: celery -A service worker --loglevel=info
+    command: python manage.py sale_documents_polling
     volumes:
       - ./service:/service
       - static_data:/service/static
@@ -68,17 +68,30 @@ services:
     environment:
       <<: *environment-defaults
 
-  celery_beat:
-    build: ./service
-    command: sh -c "celery -A service purge -f && celery -A service beat --loglevel=info"
-    volumes:
-      - ./service:/service
-      - static_data:/service/static
-    depends_on:
-      - db
-      - redis
-    environment:
-      <<: *environment-defaults
+  # celery_worker:
+  #   restart: always
+  #   build: ./service
+  #   command: celery -A service worker --loglevel=info
+  #   volumes:
+  #     - ./service:/service
+  #     - static_data:/service/static
+  #   depends_on:
+  #     - db
+  #     - redis
+  #   environment:
+  #     <<: *environment-defaults
+
+  # celery_beat:
+  #   build: ./service
+  #   command: sh -c "celery -A service purge -f && celery -A service beat --loglevel=info"
+  #   volumes:
+  #     - ./service:/service
+  #     - static_data:/service/static
+  #   depends_on:
+  #     - db
+  #     - redis
+  #   environment:
+  #     <<: *environment-defaults
 
 
   flower:

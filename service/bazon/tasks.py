@@ -13,6 +13,7 @@ from django.db import transaction
 
 @shared_task
 def sale_documents_polling():
+    return
     for bazon_account in BazonAccount.objects.all():
         bazon_api = Bazon(
             login=bazon_account.login,
