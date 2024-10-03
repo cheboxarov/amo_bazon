@@ -34,7 +34,10 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-CSRF_TRUSTED_ORIGINS = ["https://wlovem.ru", "https://www.wlovem.ru", "http://localhost:81"]
+CSRF_TRUSTED_ORIGINS = ["https://apps.widgets-tema.ru", "http://localhost:81"]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
 
 SQL_DEBUG = False
 
@@ -56,12 +59,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django_celery_beat",
+    "corsheaders",
     "celery",
     "bazon",
     "amo",
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
