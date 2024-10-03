@@ -11,3 +11,4 @@ django-celery-beat
 django-grappelli==4.0.1
 loguru
 pydantic
+django-cors-headers
