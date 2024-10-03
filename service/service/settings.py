@@ -34,7 +34,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-CSRF_TRUSTED_ORIGINS = ["https://wlovem.ru", "https://www.wlovem.ru"]
+CSRF_TRUSTED_ORIGINS = ["https://wlovem.ru", "https://www.wlovem.ru", "http://localhost:81"]
 
 SQL_DEBUG = False
 
