@@ -663,7 +663,7 @@ class Bazon:
             "request": {
                 "setContractor": {
                     "email": email,
-                    "legalType": "organization",
+                    "legalType": "organisation",
                     "name": name,
                     "phone": phone,
                     "printComment": "",
