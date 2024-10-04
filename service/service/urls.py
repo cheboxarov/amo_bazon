@@ -28,6 +28,7 @@ urlpatterns = [
                 path("grappelli/", include("grappelli.urls")),
                 path("admin/", admin.site.urls),
                 path("", include("bazon.urls")),
+                path("amo-webhook/<str:subdomain>", AmoWebhookView.as_view())
             ]
         ),
     )
