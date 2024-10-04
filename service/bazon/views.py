@@ -680,6 +680,7 @@ class BazonContractorCreateView(CustomAPIView, BazonApiMixin, SaleDocumentMixin)
         sale_document = self.get_sale_document(amo_lead_id)
         api = sale_document.get_api()
         data = request.data
+        print(data)
         response = api.set_contractor(**data)
         print(response.json())
         response_json = response.json()
