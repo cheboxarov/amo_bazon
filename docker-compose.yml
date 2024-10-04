@@ -32,8 +32,6 @@ services:
       - POSTGRES_PASSWORD=django
       - POSTGRES_DB=django
       - POSTGRES_HOST_AUTH_METHOD=trust
-    ports:
-      - "5433:5432"
 
   nginx:
     image: nginx:1.19.8-alpine

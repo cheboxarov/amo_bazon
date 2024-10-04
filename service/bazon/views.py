@@ -672,7 +672,7 @@ class BazonSaleEditView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         return self.return_response(response)
     
 
-class BazonContractorCreateView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
+class BazonContractorApiView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 
     def post(self, request, amo_lead_id: int):
         subdomain = self.check_origin(request)
