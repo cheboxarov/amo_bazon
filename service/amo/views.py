@@ -6,7 +6,8 @@ from .amo_webhooks import on_lead_status_handler, on_lead_update_handler
 
 class AmoWebhookView(APIView):
 
-    def post(self, request):
+    def post(self, request, subdomain):
+        print(subdomain)
         data = request.data
         if data.get("leads[status][0][id]") is not None:
             on_lead_status_handler(data)
