@@ -1,6 +1,6 @@
 import json
 import uuid
-
+from typing import Optional
 import requests
 from typing import Collection
 
@@ -650,7 +650,8 @@ class Bazon:
         )
 
     def set_contractor(self, name: str, 
-                       phone: str, 
+                       phone: str,
+                       id: Optional[int] = None,
                        email: str = "", 
                        BIK: str = "", 
                        INN: str = "", 
@@ -679,5 +680,8 @@ class Bazon:
                 }
             }            
         }
+
+        if (id):
+            payload["request"]["setContractor"]["id"] = id
 
         return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?setContractor", headers=self._headers, json=payload)
