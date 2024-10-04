@@ -648,3 +648,36 @@ class Bazon:
             headers=self._headers,
             json=payload,
         )
+
+    def set_contractor(self, name: str, 
+                       phone: str, 
+                       email: str = "", 
+                       BIK: str = "", 
+                       INN: str = "", 
+                       KPP: str = "", 
+                       bank_name: str = "", 
+                       legal_name: str = "",
+                       legal_address: str = "", 
+                       real_adress: str = ""):
+        payload = {
+            "request": {
+                "setContractor": {
+                    "email": email,
+                    "legalType": "organization",
+                    "name": name,
+                    "phone": phone,
+                    "printComment": "",
+                    "legalData": {
+                        "BIK": BIK,
+                        "INN": INN,
+                        "KPP": KPP,
+                        "bankName": bank_name,
+                        "name": legal_name,
+                        "legalAddress": legal_address,
+                        "realAddress": real_adress
+                    }
+                }
+            }            
+        }
+
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?setContractor", headers=self._headers, json=payload)

@@ -670,3 +670,20 @@ class BazonSaleEditView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
             logger.debug(f"[{subdomain}] Базон ответил на изменение сделки {response.json()} \n Тело запроса: {request.data}")
 
         return self.return_response(response)
+    
+
+class BazonContractorCreateView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
+
+    def post(self, request, amo_lead_id: int):
+        subdomain = self.check_origin(request)
+        logger.info(f"[{subdomain}] Начало обработки запроса создания клиента")
+        sale_document = self.get_sale_document(amo_lead_id)
+        api = sale_document.get_api()
+        data = request.data
+        response = api.set_contractor(**data)
+        print(response.json())
+        response_json = response.json()
+        return Response(response_json, status=response.status_code)
+
+
+        
