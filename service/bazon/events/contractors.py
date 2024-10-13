@@ -93,7 +93,7 @@ def on_update_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_a
     logger.debug(f"Перед созданием контакта, данные: {contractor.name} , {custom_fields}")
 
     try:
-        amo_contact = (api.update_contact(contractor.name, custom_fields=custom_fields)
+        amo_contact = (api.update_contact(contractor.amo_id, custom_fields=custom_fields)
                        .get("_embedded",{})).get("contacts", [None])[0]
         
         logger.debug(f"Обновлен контакт {amo_contact}")

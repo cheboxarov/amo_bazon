@@ -102,13 +102,13 @@ def on_update_sale_document(sale_data: dict, amo_account: AmoAccount):
             if response.status_code != 200:
                 logger.error(f"(обновление сделки) Ошибка в линковке контакта к сделке, ответ от амо: {response.text}")
                 return
+            if not contractor.amo_id:
+                return
         else:
             on_update_contractor(
                 contractor_json,
                 bazon_account=sale_document.bazon_account,
                 amo_account=sale_document.amo_account)
-        if not contractor.amo_id:
-            return
         
         logger.debug(f"(Обновление сделки) Контакт {contractor.amo_id} прилинкован к сделке {sale_document.amo_lead_id}")
 
