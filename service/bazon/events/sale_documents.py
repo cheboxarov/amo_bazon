@@ -3,7 +3,7 @@ from bazon.models import BazonAccount
 from amo.models import AmoAccount
 from amo.amo_client import DealClient
 from bazon.models import SaleDocument, Contractor
-from .contractors import on_create_contractor
+from .contractors import on_create_contractor, on_update_contractor
 from django.db import transaction
 from loguru import logger
 from amo.amo_client import AmoCRMClient
@@ -77,7 +77,7 @@ def on_update_sale_document(sale_data: dict, amo_account: AmoAccount):
         return
     response = amo_client.update_deal(**serialized_data)
 
-    sale_document = SaleDocument.objects.get(id=(serialized_data.get("id")))
+    sale_document = SaleDocument.objects.get(internal_id=(serialized_data.get("id")))
     if sale_document.contractor_id:
         api = sale_document.get_api()
         contractor_response = api.get_contractor(sale_document.contractor_id)
@@ -92,19 +92,24 @@ def on_update_sale_document(sale_data: dict, amo_account: AmoAccount):
             on_create_contractor(contractor_json,
                                 bazon_account=sale_document.bazon_account,
                                 amo_account=sale_document.amo_account)
-        contractor: Contractor = query.first()
+            amo_client: AmoCRMClient = amo_account.get_amo_client()
+
+            contractor: Contractor = query.first()
+            response = amo_client.link_entity(to_type="contacts",
+                                            to_id=contractor.amo_id,
+                                            e_id=sale_document.amo_lead_id,
+                                            e_type="leads")
+            if response.status_code != 200:
+                logger.error(f"(обновление сделки) Ошибка в линковке контакта к сделке, ответ от амо: {response.text}")
+                return
+        else:
+            on_update_contractor(
+                contractor_json,
+                bazon_account=sale_document.bazon_account,
+                amo_account=sale_document.amo_account)
         if not contractor.amo_id:
             return
         
-        amo_client: AmoCRMClient = amo_account.get_amo_client()
-
-        response = amo_client.link_entity(to_type="contacts",
-                                          to_id=contractor.amo_id,
-                                          e_id=sale_document.amo_lead_id,
-                                          e_type="leads")
-        if response.status_code != 200:
-            logger.error(f"(обновление сделки) Ошибка в линковке контакта к сделке, ответ от амо: {response.text}")
-            return
         logger.debug(f"(Обновление сделки) Контакт {contractor.amo_id} прилинкован к сделке {sale_document.amo_lead_id}")
 
     
