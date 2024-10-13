@@ -67,7 +67,7 @@ def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_a
 def on_update_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_account: BazonAccount):
     logger.debug(f"UPDATE contractor_data: {_Contractor.model_validate(contractor_data).model_dump()}")
     validated_contractor_data = _Contractor.model_validate(contractor_data).model_dump()
-    contractor = Contractor.objects.get(internal_id=validated_contractor_data.get("internal_id"))
+    contractor = Contractor.objects.get(amo_account=amo_account, internal_id=validated_contractor_data.get("internal_id"))
     contractor.delete()
     contractor = Contractor.objects.create(amo_account=amo_account,
                                            **validated_contractor_data,
