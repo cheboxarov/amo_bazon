@@ -68,10 +68,12 @@ def on_update_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_a
     logger.debug(f"UPDATE contractor_data: {_Contractor.model_validate(contractor_data).model_dump()}")
     validated_contractor_data = _Contractor.model_validate(contractor_data).model_dump()
     contractor = Contractor.objects.get(amo_account=amo_account, internal_id=validated_contractor_data.get("internal_id"))
+    amo_id = contractor
     contractor.delete()
     contractor = Contractor.objects.create(amo_account=amo_account,
                                            **validated_contractor_data,
-                                           bazon_account=bazon_account)
+                                           bazon_account=bazon_account,
+                                           amo_id=amo_id)
     api = ContactClient(amo_account.token, amo_account.suburl)
     custom_fields = []
     def append_value(field_id: int, value: str):

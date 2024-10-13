@@ -104,12 +104,12 @@ def on_update_sale_document(sale_data: dict, amo_account: AmoAccount):
                 return
             if not contractor.amo_id:
                 return
+            logger.debug(f"(Обновление сделки) Контакт {contractor.amo_id} прилинкован к сделке {sale_document.amo_lead_id}")
         else:
             on_update_contractor(
                 contractor_json,
                 bazon_account=sale_document.bazon_account,
                 amo_account=sale_document.amo_account)
         
-        logger.debug(f"(Обновление сделки) Контакт {contractor.amo_id} прилинкован к сделке {sale_document.amo_lead_id}")
-
+        logger.debug(f"Обновлен контакт {contractor_json}")
     
