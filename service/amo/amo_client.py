@@ -157,7 +157,7 @@ class ContactClient(AmoCRMClient):
         if company_id:
             data["company_id"] = company_id
 
-        response = requests.put(url, headers=self._get_headers(), json=data)
+        response = requests.patch(url, headers=self._get_headers(), json=data)
         response.raise_for_status()
         return response.json()
 
