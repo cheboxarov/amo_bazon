@@ -64,20 +64,23 @@ def on_create_sale_document(
             return
         logger.debug(f"Контакт {contractor.amo_id} прилинкован к сделке {sale_document.amo_lead_id}")
 
-def on_update_sale_document(sale_data: dict, amo_account: AmoAccount):
+def on_update_sale_document(amo_account: AmoAccount, sale_data: dict | None = None, sale_document: SaleDocument | None = None):
+
+    if sale_data is None and sale_document is None:
+        raise ValueError("Sale data and document is None")
 
     logger.debug(f"Начало обновления сделки {sale_data}")
+    if sale_data is not None:
+        serializer = BazonSaleToAmoLeadSerializer(amo_account, sale_data)
+        serializer.serialize()
+        serialized_data = serializer.get_serialized_data(with_id=True)
+        amo_client = DealClient(amo_account.token, amo_account.suburl)
+        
+        if serialized_data.get("id") is None:
+            return
+        response = amo_client.update_deal(**serialized_data)
 
-    serializer = BazonSaleToAmoLeadSerializer(amo_account, sale_data)
-    serializer.serialize()
-    serialized_data = serializer.get_serialized_data(with_id=True)
-    amo_client = DealClient(amo_account.token, amo_account.suburl)
-    
-    if serialized_data.get("id") is None:
-        return
-    response = amo_client.update_deal(**serialized_data)
-
-    sale_document = SaleDocument.objects.get(amo_lead_id=(serialized_data.get("id")))
+        sale_document = SaleDocument.objects.get(amo_lead_id=(serialized_data.get("id")))
     if sale_document.contractor_id:
         api = sale_document.get_api()
         contractor_response = api.get_contractor(sale_document.contractor_id)

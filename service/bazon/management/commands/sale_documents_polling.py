@@ -59,6 +59,6 @@ class Command(BaseCommand):
                                     if document_dict.get(key) != value:
                                         setattr(sale_document, key, value)
                                 sale_document.save()
-                                on_update_sale_document(json_document, amo_account)
+                                on_update_sale_document(sale_data=json_document, amo_account=amo_account)
                         else:
                             on_create_sale_document(json_document, amo_account)

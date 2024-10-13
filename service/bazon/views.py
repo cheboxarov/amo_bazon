@@ -15,6 +15,7 @@ from amo.models import AmoAccount
 from utils.serializers.bazon_serializers import ItemsListSerializer
 from .mixins import OriginCheckMixin, SaleDocumentMixin, BazonApiMixin
 import json
+from .events import on_update_sale_document
 
 
 class CustomAPIView(OriginCheckMixin, APIView):
@@ -667,6 +668,7 @@ class BazonSaleEditView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 
         with sale_document.generate_lock_key() as lock_key:
             response = api.edit_sale(sale_document.internal_id, request.data, lock_key)
+            on_update_sale_document(sale_document=sale_document, amo_account=sale_document.amo_account)
             logger.debug(f"[{subdomain}] Базон ответил на изменение сделки {response.json()} \n Тело запроса: {request.data}")
 
         return self.return_response(response)
@@ -680,10 +682,9 @@ class BazonContractorApiView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         sale_document = self.get_sale_document(amo_lead_id)
         api = sale_document.get_api()
         data = request.data
-        print(data)
         response = api.set_contractor(**data)
-        print(response.json())
         response_json = response.json()
+        on_update_sale_document(sale_document=sale_document, amo_account=sale_document.amo_account)
         return Response(response_json, status=response.status_code)
 
 
