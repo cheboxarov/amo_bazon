@@ -676,6 +676,21 @@ class BazonSaleEditView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 
 class BazonContractorApiView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 
+    def get(self, request, amo_lead_id: int):
+        subdomain = self.check_origin(request)
+        logger.inf(f"[{subdomain}] Начало обработки запроса на получение контрагента")
+
+        sale_docoument = self.get_sale_document(amo_lead_id)
+        contractor_id = sale_docoument.contractor_id
+        if contractor_id is None:
+            logger.inf(f"[{subdomain}] У сделки не найден контрагент")
+            return Response({"error": "not found contractor"}, status=404)
+        api = sale_docoument.get_api()
+        response = api.get_contractor(contractor_id)
+        logger.inf(f"[{subdomain}] Получен контрагент с базона, статус ответа: {response.status_code}\nBody: {response.json()}")
+        return Response(response.json(), response.status_code)
+        
+
     def post(self, request, amo_lead_id: int):
         subdomain = self.check_origin(request)
         logger.info(f"[{subdomain}] Начало обработки запроса создания клиента")
