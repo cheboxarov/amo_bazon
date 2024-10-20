@@ -681,7 +681,7 @@ class BazonContractorsListView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         subdomain = self.check_origin(request)
         sale_docoument: SaleDocument = self.get_sale_document(amo_lead_id)
         params = request.query_params
-        offset, limit = 0, 5000
+        offset, limit = 0, 500
         if (params_offset := params.get("offset")) is not None:
             try:
                 offset = int(params_offset)
