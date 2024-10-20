@@ -672,7 +672,31 @@ class BazonSaleEditView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
             logger.debug(f"[{subdomain}] Базон ответил на изменение сделки {response.json()} \n Тело запроса: {request.data}")
 
         return self.return_response(response)
-    
+
+
+class BazonContractorsListView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
+
+    def get(self, request, amo_lead_id):
+        subdomain = self.check_origin(request)
+        sale_docoument: SaleDocument = self.get_sale_document(amo_lead_id)
+        params = self.query_params()
+        offset, limit = 0, 50000
+        if (params_offset := params.get("offset")) is not None:
+            try:
+                offset = int(params_offset)
+            except ValueError:
+                pass
+        if (params_limit := params.get("limit")) is not None:
+            try:
+                limit = int(params_limit)
+            except ValueError:
+                pass
+        bazon_api = sale_docoument.get_api()
+        response = bazon_api.get_contractors(offset, limit)
+        return Response(response.json(), response.status_code)
+        
+        
+
 
 class BazonContractorApiView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 
