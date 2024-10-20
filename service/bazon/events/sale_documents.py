@@ -109,6 +109,12 @@ def on_update_sale_document(amo_account: AmoAccount, sale_data: dict | None = No
                 return
             logger.debug(f"(Обновление сделки) Контакт {contractor.amo_id} прилинкован к сделке {sale_document.amo_lead_id}")
         else:
+            amo_client: AmoCRMClient = amo_account.get_amo_client()
+            contractor: Contractor = query.first()
+            response = amo_client.link_entity(to_type="contacts",
+                                            to_id=contractor.amo_id,
+                                            e_id=sale_document.amo_lead_id,
+                                            e_type="leads")
             on_update_contractor(
                 contractor_json,
                 bazon_account=sale_document.bazon_account,
