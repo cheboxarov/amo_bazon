@@ -16,6 +16,7 @@ from utils.serializers.bazon_serializers import ItemsListSerializer
 from .mixins import OriginCheckMixin, SaleDocumentMixin, BazonApiMixin
 import json
 from .events import on_update_sale_document
+from rest_framework.request import Request
 
 
 class CustomAPIView(OriginCheckMixin, APIView):
@@ -676,11 +677,11 @@ class BazonSaleEditView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 
 class BazonContractorsListView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 
-    def get(self, request, amo_lead_id):
+    def get(self, request: Request, amo_lead_id):
         subdomain = self.check_origin(request)
         sale_docoument: SaleDocument = self.get_sale_document(amo_lead_id)
         params = request.query_params
-        offset, limit = 0, 50000
+        offset, limit = 0, 5000
         if (params_offset := params.get("offset")) is not None:
             try:
                 offset = int(params_offset)
