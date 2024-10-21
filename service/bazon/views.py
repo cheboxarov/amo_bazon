@@ -728,4 +728,16 @@ class BazonContractorApiView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         return Response(response_json, status=response.status_code)
 
 
+class BazonSaleUpdate(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
+
+    def get(self, request, amo_lead_id: int):
+        subdomain = self.check_origin(request)
+        logger.info(f"[{subdomain}] Начало обработки запроса на обновление сделки")
+        sale_document = self.get_sale_document(amo_lead_id)
+        try:
+            on_update_sale_document(sale_document=sale_document, amo_account=sale_document.amo_account)
+            return Response(data={"status": "ok"}, status=200)
+        except Exception as err:
+            return Response(status=500)
+        
         

@@ -19,7 +19,8 @@ from .views import (
     BazonPrintFromView,
     BazonSaleEditView,
     BazonContractorApiView,
-    BazonContractorsListView
+    BazonContractorsListView,
+    BazonSaleUpdate
 )
 
 urlpatterns = [
@@ -47,5 +48,6 @@ urlpatterns = [
     path("bazon-sale/<int:amo_lead_id>/print-form", BazonPrintFromView.as_view()),
     path("bazon-sale/<int:amo_lead_id>/edit", BazonSaleEditView.as_view()),
     path("bazon-sale/<int:amo_lead_id>/contractor", BazonContractorApiView.as_view()),
-    path("bazon-sale/<int:amo_lead_id>/contractors", BazonContractorsListView.as_view())
+    path("bazon-sale/<int:amo_lead_id>/contractors", BazonContractorsListView.as_view()),
+    path("bazon-sale/<int:amo_lead_id>/update", BazonSaleUpdate.as_view())
 ]
