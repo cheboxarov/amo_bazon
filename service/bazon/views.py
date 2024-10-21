@@ -52,6 +52,9 @@ class BazonSaleDetailView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
 
         if response.status_code == 200:
             data = response.json()
+            document_json = data["response"]["getDocument"]
+            document_json["internal_id"] = document_json.pop("id")
+            on_update_sale_document(sale_data=document_json, amo_account=sale_document.amo_account)
             validated_data = {
                 "document": data["response"]["getDocument"],
                 "items": data.get("response", {})
@@ -731,6 +734,7 @@ class BazonContractorApiView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 class BazonSaleUpdate(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 
     def get(self, request, amo_lead_id: int):
+        return Response(data={"status": "ok"}, status=200)
         subdomain = self.check_origin(request)
         logger.info(f"[{subdomain}] Начало обработки запроса на обновление сделки")
         sale_document = self.get_sale_document(amo_lead_id)
