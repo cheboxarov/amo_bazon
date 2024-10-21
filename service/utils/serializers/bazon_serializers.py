@@ -36,7 +36,7 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
         if Manager.objects.filter(
             bazon_id=manager_id, amo_account=self.amo_account
         ).exists():
-            manager = Manager.objects.filter(bazon_id=manager_id).first()
+            manager = Manager.objects.filter(bazon_id=manager_id, amo_account=self.amo_account).first()
             serialized_data["responsible_user_id"] = manager.amo_id
         self._serialized_data = serialized_data
 
