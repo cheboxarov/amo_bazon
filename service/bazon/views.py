@@ -53,9 +53,9 @@ class BazonSaleDetailView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         if response.status_code == 200:
             data = response.json()
             logger.debug(f"Сделка получена: {data}")
-            # document_json = data["response"]["getDocument"]
-            # document_json["internal_id"] = document_json.pop("id")
-            # on_update_sale_document(sale_data=document_json, amo_account=sale_document.amo_account)
+            document_json = data["response"]["getDocument"]["Document"]
+            document_json["internal_id"] = document_json.pop("id")
+            on_update_sale_document(sale_data=document_json, amo_account=sale_document.amo_account)
             validated_data = {
                 "document": data["response"]["getDocument"],
                 "items": data.get("response", {})
