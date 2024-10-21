@@ -27,7 +27,7 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
         if sum:
             serialized_data["price"] = sum
         bazon_status = self.data.get("status")
-        if bazon_status is None:
+        if bazon_status not in ["draft", "reserve", "issued", "canceled"]:
             bazon_status = self.data.get("state")
         if Status.objects.filter(bazon_status=bazon_status).exists():
             status = Status.objects.filter(
