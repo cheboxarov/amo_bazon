@@ -740,7 +740,6 @@ class BazonSaleUpdate(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         logger.debug(f"Акутализирую сделку - {sale_document_data}")
         document_json = sale_document_data["response"]["getDocument"]["Document"]
         document_json["internal_id"] = document_json.pop("id")
-        sale_document_data["internal_id"] = sale_document_data.pop("id")
         try:
             on_update_sale_document(sale_data=document_json, amo_account=sale_document.amo_account)
             return Response(data={"status": "ok"}, status=200)
