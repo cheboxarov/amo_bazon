@@ -78,6 +78,7 @@ def on_update_sale_document(amo_account: AmoAccount, sale_data: dict | None = No
         
         if serialized_data.get("id") is None:
             return
+        logger.debug(f"Обновляю сделку в амо: {serialized_data}")
         response = amo_client.update_deal(**serialized_data)
 
         sale_document = SaleDocument.objects.filter(amo_lead_id=(serialized_data.get("id"))).first()
