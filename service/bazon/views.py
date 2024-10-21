@@ -736,7 +736,7 @@ class BazonSaleUpdate(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         logger.info(f"[{subdomain}] Начало обработки запроса на обновление сделки")
         sale_document = self.get_sale_document(amo_lead_id)
         bazon_api = sale_document.get_api()
-        sale_document_data = bazon_api.get_detail_document(int(sale_document.internal_id)).json()
+        sale_document_data = bazon_api.get_detail_document(int(sale_document.number)).json()
         logger.debug(f"Акутализирую сделку - {sale_document_data}")
         document_json = sale_document_data["response"]["getDocument"]["Document"]
         document_json["internal_id"] = document_json.pop("id")
