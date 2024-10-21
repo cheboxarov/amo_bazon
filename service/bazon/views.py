@@ -736,13 +736,12 @@ class BazonSaleUpdate(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         logger.info(f"[{subdomain}] Начало обработки запроса на обновление сделки")
         sale_document = self.get_sale_document(amo_lead_id)
         bazon_api = sale_document.get_api()
-        sale_document_data = bazon_api.get_detail_document(sale_document.internal_id)
+        sale_document_data = bazon_api.get_detail_document(sale_document.internal_id).json()
         document_json = sale_document_data["response"]["getDocument"]["Document"]
         document_json["internal_id"] = document_json.pop("id")
-        on_update_sale_document(sale_data=document_json, amo_account=sale_document.amo_account)
         sale_document_data["internal_id"] = sale_document_data.pop("id")
         try:
-            on_update_sale_document(sale_data=sale_document_data, amo_account=sale_document.amo_account)
+            on_update_sale_document(sale_data=document_json, amo_account=sale_document.amo_account)
             return Response(data={"status": "ok"}, status=200)
         except Exception as err:
             return Response(status=500)
