@@ -15,9 +15,9 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
 
         serialized_data = {"name": f"Сделка с Bazon №{self.data.get('number')}"}
         try:
-            sale_document = SaleDocument.objects.get(
+            sale_document = SaleDocument.objects.filter(
                 internal_id=self.data.get("internal_id"), amo_account=self.amo_account
-            )
+            ).first()
             amo_lead_id = sale_document.amo_lead_id
             if amo_lead_id:
                 serialized_data["id"] = amo_lead_id
@@ -28,15 +28,15 @@ class BazonSaleToAmoLeadSerializer(BaseSerializer):
             serialized_data["price"] = sum
         bazon_status = self.data.get("status")
         if Status.objects.filter(bazon_status=bazon_status).exists():
-            status = Status.objects.get(
+            status = Status.objects.filter(
                 bazon_status=bazon_status, amo_account=self.amo_account
-            )
+            ).first()
             serialized_data["status_id"] = status.amo_id
         manager_id = self.data.get("manager_id")
         if Manager.objects.filter(
             bazon_id=manager_id, amo_account=self.amo_account
         ).exists():
-            manager = Manager.objects.get(bazon_id=manager_id)
+            manager = Manager.objects.filter(bazon_id=manager_id).first()
             serialized_data["responsible_user_id"] = manager.amo_id
         self._serialized_data = serialized_data
 

@@ -80,7 +80,7 @@ def on_update_sale_document(amo_account: AmoAccount, sale_data: dict | None = No
             return
         response = amo_client.update_deal(**serialized_data)
 
-        sale_document = SaleDocument.objects.get(amo_lead_id=(serialized_data.get("id")))
+        sale_document = SaleDocument.objects.filter(amo_lead_id=(serialized_data.get("id"))).first()
     if sale_document.contractor_id:
         api = sale_document.get_api()
         contractor_response = api.get_contractor(sale_document.contractor_id)
