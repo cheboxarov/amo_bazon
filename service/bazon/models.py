@@ -1,5 +1,6 @@
 from django.db import models
 from utils.bazon_api import Bazon
+from rest_framework.exceptions import APIException
 
 
 class BazonAccount(models.Model):
@@ -80,7 +81,7 @@ class SaleDocument(models.Model):
             api = self.sale_document.get_api()
             lock_key = api.generate_lock_key(self.sale_document.number)
             if lock_key is None:
-                print("Error to generate lock key")
+                raise APIException(detail="cant_generate_lock_key", code=403)
             self.lock_key = lock_key
             return self.lock_key
 
