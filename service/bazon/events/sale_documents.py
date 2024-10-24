@@ -36,6 +36,8 @@ def on_create_sale_document(
     sale_document = query.first()
 
     if sale_document.contractor_id:
+        if sale_document.contractor_id == 1:
+            return
         api = sale_document.get_api()
         contractor_response = api.get_contractor(sale_document.contractor_id)
         contractor_json = (contractor_response.json()
@@ -83,6 +85,8 @@ def on_update_sale_document(amo_account: AmoAccount, sale_data: dict | None = No
 
         sale_document = SaleDocument.objects.filter(amo_lead_id=(serialized_data.get("id"))).first()
     if sale_document.contractor_id:
+        if sale_document.contractor_id == 1:
+            return
         api = sale_document.get_api()
         contractor_response = api.get_contractor(sale_document.contractor_id)
         contractor_json = (contractor_response.json()
