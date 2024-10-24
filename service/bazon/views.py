@@ -17,6 +17,7 @@ from .mixins import OriginCheckMixin, SaleDocumentMixin, BazonApiMixin
 import json
 from .events import on_update_sale_document
 from rest_framework.request import Request
+from rest_framework.exceptions import APIException
 
 
 class CustomAPIView(OriginCheckMixin, APIView):
@@ -176,9 +177,7 @@ class BazonItemsAddView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
                 logger.error(
                     f"{subdomain}: BazonItemsAddView - Не удалось получить lock key"
                 )
-                return Response(
-                    {"Error": "Cant get lock key"}, status=HTTP_502_BAD_GATEWAY
-                )
+                raise APIException(detail="invalid_key_lock", code=403)
 
             items_to_add = []
             for item in items:
@@ -331,7 +330,7 @@ class BazonMoveSaleView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         with sale_document.generate_lock_key() as lock_key:
             if lock_key is None:
                 logger.error(f"{subdomain}: BazonMoveSaleView - Неверный lock_key")
-                return Response({"Error": "bad_lock_key"}, status=HTTP_404_NOT_FOUND)
+                raise APIException(detail="invalid_key_lock", code=403)
 
             response = None
             if state == "reserve":
@@ -379,7 +378,7 @@ class BazonAddSalePayView(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         with sale_document.generate_lock_key() as lock_key:
             if lock_key is None:
                 logger.error(f"{subdomain}: BazonAddSalePayView - Неверный lock_key")
-                return Response({"Error": "bad_lock_key"}, status=HTTP_423_LOCKED)
+                raise APIException(detail="invalid_key_lock", code=403)
 
             response = bazon_api.add_sale_pay(
                 sale_document.internal_id, lock_key, pay_source, pay_sum, comment
@@ -482,7 +481,7 @@ class BazonSalePayBack(CustomAPIView, SaleDocumentMixin, BazonApiMixin):
         with sale_document.generate_lock_key() as lock_key:
             if lock_key is None:
                 logger.error(f"{subdomain}: BazonSalePayBack - Неверный lock_key")
-                return Response({"Error": "bad_lock_key"}, status=HTTP_502_BAD_GATEWAY)
+                raise APIException(detail="invalid_key_lock", code=403)
 
             response = bazon_api.sale_pay_back(
                 sale_document.internal_id, lock_key, pay_source, pay_sum
