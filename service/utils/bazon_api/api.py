@@ -10,7 +10,7 @@ from urllib3 import request
 def bazon_response_log(func):
     def wrapper(*args, **kwargs):
         response = func(*args, **kwargs)
-        logger.debug(f"Ответ от базона по методу {func.__name__} args({args}) kwargs({kwargs}):\n{response.json()}")
+        # logger.debug(f"Ответ от базона по методу {func.__name__} args({args}) kwargs({kwargs}):\n{response.json()}")
         return response
     return wrapper
 
@@ -549,7 +549,6 @@ class Bazon:
     def sale_issue(self, document_id: int, lock_key: str):
         return self._sale_move(document_id, lock_key, "saleIssue")
 
-    @bazon_response_log
     def generate_lock_key(self, document_number: str):
         response = self.set_lock_key(document_number)
         response.raise_for_status()
