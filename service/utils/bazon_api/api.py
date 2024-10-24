@@ -8,7 +8,7 @@ from urllib3 import request
 from rest_framework.exceptions import APIException
 
 
-def bazon_response_log(func):
+def bazon_response_check(func):
     def wrapper(*args, **kwargs):
         response = func(*args, **kwargs)
         data: dict = response.json()
@@ -17,8 +17,11 @@ def bazon_response_log(func):
             for key, response_item in response_data.items():
                 if (error := response_item.get("error")):
                     logger.error(f"Ошибочный ответ от базона по методу {func.__name__} args({args}) kwargs({kwargs}):\n{error}")
-                    raise APIException(detail="invalid_key_lock", code=403)
-        except Exception:
+                    if error == "invalid_lock":
+                        raise APIException(detail="invalid_key_lock", code=403)
+        except APIException:
+            raise
+        except Exception as err:
             pass
         return response
     return wrapper
@@ -53,7 +56,7 @@ class Bazon:
     def get_access_token(self):
         return self._access_token
 
-    @bazon_response_log
+    @bazon_response_check
     def get_auth_data(self) -> requests.Response:
         url = "https://a.baz-on.ru/login/user"
 
@@ -62,7 +65,7 @@ class Bazon:
         response = requests.post(url=url, json=payload)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def refresh_tokens(self):
         url = "https://a.baz-on.ru/refresh/user"
 
@@ -79,7 +82,7 @@ class Bazon:
         self._refresh_token = refresh_data.json()["RT"]
         self._access_token = refresh_data.json()["AT"]
 
-    @bazon_response_log
+    @bazon_response_check
     def get_sale_documents(self, params: dict = {}) -> requests.Response:
         if params.get("order") is None:
             params["order"] = "desc"
@@ -89,7 +92,7 @@ class Bazon:
         response = requests.get(url, headers=self._headers, params=params)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def get_products(self, params: dict = {}) -> requests.Response:
         if params.get("order") is None:
             params["order"] = "desc"
@@ -98,7 +101,7 @@ class Bazon:
         response = requests.get(url, headers=self._headers, params=params)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def get_detail_document(
         self, document_id: int, params: dict = None
     ) -> requests.Response:
@@ -138,7 +141,7 @@ class Bazon:
         )
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def create_sale(
         self,
         source: str,
@@ -184,7 +187,7 @@ class Bazon:
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def set_lock_key(self, number: str, prev_lock_key=False, type: str = "sale"):
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
@@ -199,7 +202,7 @@ class Bazon:
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def sale_recreate(self, document_id: int, lock_key: str):
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
@@ -210,7 +213,7 @@ class Bazon:
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def cancel_sale(self, document_id: int, lock_key: str):
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
@@ -219,7 +222,7 @@ class Bazon:
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def get_users(self, offset: int, limit: int):
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
@@ -241,7 +244,7 @@ class Bazon:
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def get_check(self, id: int, print_type: str = "default"):
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
@@ -252,7 +255,7 @@ class Bazon:
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def get_document_items(self, document_number: str, document_type: str = "sale"):
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
@@ -272,7 +275,7 @@ class Bazon:
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def edit_sale(self, id: int, data_to_edit: dict, lock_key: str):
         url = "https://kontrabaz.baz-on.ru/frontend-api/"
         data = {
@@ -289,7 +292,7 @@ class Bazon:
         response = requests.post(url, json=data, headers=self._headers)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def get_orders(
         self, offset: int = 0, limit: int = 500, for_sale_document: str = None
     ):
@@ -304,7 +307,7 @@ class Bazon:
         response = requests.get(url, params=params, headers=self._headers)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def get_contractors(self, offset: int = 0, limit: int = 500):
         params = {"order": "desc", "limit": limit}
         if offset > 0:
@@ -313,7 +316,7 @@ class Bazon:
         response = requests.get(url, params=params, headers=self._headers)
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def get_contractor(self, contractor_id: int):
 
         payload = {
@@ -328,7 +331,7 @@ class Bazon:
 
         return requests.post(url, json=payload, headers=self._headers)
 
-    @bazon_response_log
+    @bazon_response_check
     def get_items(
         self,
         offset: int = 0,
@@ -383,7 +386,7 @@ class Bazon:
         )
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def add_item_to_document(self, lockKey: str, document_id: int, items: list[dict]):
         """
         {
@@ -437,7 +440,7 @@ class Bazon:
         )
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def drop_lock_key(self, document_id: id, lock_key: str):
         data = {
             "request": {
@@ -456,7 +459,7 @@ class Bazon:
         )
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def get_document_items_by_buffer(self, items: list[dict]):
         """items
         [
@@ -499,7 +502,7 @@ class Bazon:
         )
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def remove_document_items(self, document_id: int, lock_key: str, items: list[int]):
 
         data = {
@@ -531,7 +534,7 @@ class Bazon:
         )
         return response
 
-    @bazon_response_log
+    @bazon_response_check
     def _sale_move(
         self, document_id: int, lock_key: str, method: str
     ) -> requests.Response:
@@ -569,7 +572,7 @@ class Bazon:
         )
         return lock_key
 
-    @bazon_response_log
+    @bazon_response_check
     def add_sale_pay(
         self,
         document_id: int,
@@ -596,7 +599,7 @@ class Bazon:
             json=payload,
         )
 
-    @bazon_response_log
+    @bazon_response_check
     def get_pay_sources(self):
 
         payload = {
@@ -615,7 +618,7 @@ class Bazon:
             json=payload,
         )
 
-    @bazon_response_log
+    @bazon_response_check
     def get_paid_sources(self, document_id: int):
 
         payload = {"request": {"getDocumentPaidSources": {"documentID": document_id}}}
@@ -626,7 +629,7 @@ class Bazon:
             json=payload,
         )
 
-    @bazon_response_log
+    @bazon_response_check
     def sale_pay_back(self, document_id: int, lock_key: str, pay_source: int, sum: int):
 
         payload = {
@@ -649,7 +652,7 @@ class Bazon:
             json=payload,
         )
 
-    @bazon_response_log
+    @bazon_response_check
     def get_sources(self):
         payload = {"request": {"getSaleSourcesReference": {"where": {"isArchive": 0}}}}
 
@@ -659,7 +662,7 @@ class Bazon:
             headers=self._headers,
         )
 
-    @bazon_response_log
+    @bazon_response_check
     def get_storages(self):
 
         payload = {"request": {"getStoragesReference:full": {"_": ""}}}
@@ -670,7 +673,7 @@ class Bazon:
             headers=self._headers,
         )
 
-    @bazon_response_log
+    @bazon_response_check
     def get_managers(self):
 
         payload = {"request": {"getUsersReference": {"_": ""}}}
@@ -681,7 +684,7 @@ class Bazon:
             headers=self._headers,
         )
 
-    @bazon_response_log
+    @bazon_response_check
     def get_form_print(self, document_id: int, print_type: str = "default"):
 
         payload = {
@@ -696,7 +699,7 @@ class Bazon:
             json=payload,
         )
 
-    @bazon_response_log
+    @bazon_response_check
     def set_contractor(self, name: str, 
                        phone: str,
                        id: Optional[int] = None,
