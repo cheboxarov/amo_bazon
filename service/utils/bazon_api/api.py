@@ -5,6 +5,7 @@ import requests
 from typing import Collection
 from loguru import logger
 from urllib3 import request
+from rest_framework.exceptions import APIException
 
 
 def bazon_response_log(func):
@@ -16,6 +17,7 @@ def bazon_response_log(func):
             for key, response_item in response_data.items():
                 if (error := response_item.get("error")):
                     logger.error(f"Ошибочный ответ от базона по методу {func.__name__} args({args}) kwargs({kwargs}):\n{error}")
+                    raise APIException(detail="invalid_key_lock", code=403)
         except Exception:
             pass
         return response
