@@ -11,10 +11,13 @@ def bazon_response_log(func):
     def wrapper(*args, **kwargs):
         response = func(*args, **kwargs)
         data: dict = response.json()
-        response_data: dict = data.get("response", dict())
-        for key, response_item in response_data.items():
-            if (error := response_item.get("error")):
-                logger.error(f"Ошибочный ответ от базона по методу {func.__name__} args({args}) kwargs({kwargs}):\n{error}")
+        response_data: dict = data.get("response", {})
+        try:
+            for key, response_item in response_data.items():
+                if (error := response_item.get("error")):
+                    logger.error(f"Ошибочный ответ от базона по методу {func.__name__} args({args}) kwargs({kwargs}):\n{error}")
+        except Exception:
+            pass
         return response
     return wrapper
 
