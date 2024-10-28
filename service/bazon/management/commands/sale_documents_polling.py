@@ -23,7 +23,7 @@ class Command(BaseCommand):
                         refresh_token=bazon_account.refresh_token,
                         access_token=bazon_account.access_token,
                     )
-                    params = {"limit": 50}
+                    params = {"limit": 200}
                     response = bazon_api.get_sale_documents(params=params)
                     if response.status_code != 200:
                         bazon_account.refresh_auth()
