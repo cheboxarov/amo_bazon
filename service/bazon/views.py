@@ -745,4 +745,15 @@ class BazonSaleUpdate(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         except Exception as err:
             return Response(status=500)
         
-        
+
+class BazonItemEditCost(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
+
+    def post(self, request: Request, amo_lead_id: int):
+        subdomain = self.check_origin(request)
+        logger.info(f"[{subdomain}] Начало обработки запроса на изменение цены товара")
+        sale_document = self.get_sale_document(amo_lead_id)
+        bazon_api = sale_document.get_api()
+        data = request.data
+        with sale_document.generate_lock_key() as lock_key:
+            response = bazon_api.edit_item_cost(data.get("items"), sale_document.internal_id, lock_key)
+        return Response(data=response.json(), status=response.status_code)

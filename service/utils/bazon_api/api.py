@@ -736,3 +736,16 @@ class Bazon:
             payload["request"]["setContractor"]["id"] = id
 
         return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?setContractor", headers=self._headers, json=payload)
+    
+    @bazon_response_check
+    def edit_item_cost(self, items: dict[str, int], document_id: int, lock_key: str):
+        data = {
+            "request": {
+                "saleEditItemCost": {
+                    "items": items,
+                    "documentID": document_id,
+                    "lockKey": lock_key
+                }
+            }
+        }
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?saleEditItemCost", headers=self._headers, json=data)
