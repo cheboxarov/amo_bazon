@@ -20,92 +20,128 @@ class _Contractor(BaseModel):
     balance: int
 
 
-def on_create_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_account: BazonAccount):
+def on_create_contractor(
+    amo_account: AmoAccount,
+    bazon_account: BazonAccount,
+    contractor: Contractor = None,
+    contractor_data: dict = None,
+):
+    if contractor_data is not None:
+        logger.debug(
+            f"contractor_data: {_Contractor.model_validate(contractor_data).model_dump()}"
+        )
 
-    logger.debug(f"contractor_data: {_Contractor.model_validate(contractor_data).model_dump()}")
+    if contractor is None:
+        contractor = Contractor.objects.create(
+            amo_account=amo_account,
+            **_Contractor.model_validate(contractor_data).model_dump(),
+            bazon_account=bazon_account,
+        )
 
-    contractor = Contractor.objects.create(amo_account=amo_account,
-                                           **_Contractor.model_validate(contractor_data).model_dump(),
-                                           bazon_account=bazon_account)
     api = ContactClient(amo_account.token, amo_account.suburl)
     custom_fields = []
+
     def append_value(field_id: int, value: str):
-        custom_fields.append({
-            "field_id": field_id,
-            "values": [
-                {
-                    "value": value
-                }
-            ]
-        })
+        custom_fields.append({"field_id": field_id, "values": [{"value": value}]})
 
     amo_config = json.loads(amo_account.config)
-    if (contact_phone_field := amo_config.get("contact_phone_field")) and contractor.phone != "":
+    if (
+        contact_phone_field := amo_config.get("contact_phone_field")
+    ) and contractor.phone != "":
         append_value(contact_phone_field, contractor.phone)
-    if (contact_email_id := amo_config.get("contact_email_field")) and contractor.email != "":
+    if (
+        contact_email_id := amo_config.get("contact_email_field")
+    ) and contractor.email != "":
         append_value(contact_email_id, contractor.email)
 
-    logger.debug(f"Перед созданием контакта, данные: {contractor.name} , {custom_fields}")
+    logger.debug(
+        f"Перед созданием контакта, данные: {contractor.name} , {custom_fields}"
+    )
 
     try:
-        amo_contact = (api.create_contact(contractor.name, custom_fields=custom_fields)
-                       .get("_embedded",{})).get("contacts", [None])[0]
-        
+        amo_contact = (
+            api.create_contact(contractor.name, custom_fields=custom_fields).get(
+                "_embedded", {}
+            )
+        ).get("contacts", [None])[0]
+
         logger.debug(f"Создан контакт {amo_contact}")
 
     except Exception as error:
 
         logger.error(f"Error create contact: {error} {custom_fields}")
         return
-    
+
     if amo_contact is None:
         return
     contractor.amo_id = amo_contact.get("id")
     contractor.save()
+    return contractor
 
 
-def on_update_contractor(contractor_data: dict, amo_account: AmoAccount, bazon_account: BazonAccount):
-    logger.debug(f"UPDATE contractor_data: {_Contractor.model_validate(contractor_data).model_dump()}")
+def on_update_contractor(
+    contractor_data: dict, amo_account: AmoAccount, bazon_account: BazonAccount
+):
+    logger.debug(
+        f"UPDATE contractor_data: {_Contractor.model_validate(contractor_data).model_dump()}"
+    )
     validated_contractor_data = _Contractor.model_validate(contractor_data).model_dump()
-    contractor = Contractor.objects.get(amo_account=amo_account, internal_id=validated_contractor_data.get("internal_id"))
+    contractor = Contractor.objects.get(
+        amo_account=amo_account,
+        internal_id=validated_contractor_data.get("internal_id"),
+    )
     contact_amo_id = contractor.amo_id
     contractor.delete()
-    contractor = Contractor.objects.create(amo_account=amo_account,
-                                           **validated_contractor_data,
-                                           bazon_account=bazon_account,
-                                           amo_id=contact_amo_id)
+    if contact_amo_id is None:
+        contractor = on_create_contractor(
+            contractor_data=validated_contractor_data,
+            amo_account=amo_account,
+            bazon_account=bazon_account,
+        )
+    else:
+        contractor = Contractor.objects.create(
+            amo_account=amo_account,
+            **validated_contractor_data,
+            bazon_account=bazon_account,
+            amo_id=contact_amo_id,
+        )
+
     api = ContactClient(amo_account.token, amo_account.suburl)
+
     custom_fields = []
     def append_value(field_id: int, value: str):
-        custom_fields.append({
-            "field_id": field_id,
-            "values": [
-                {
-                    "value": value
-                }
-            ]
-        })
+        custom_fields.append({"field_id": field_id, "values": [{"value": value}]})
 
     amo_config = json.loads(amo_account.config)
-    if (contact_phone_field := amo_config.get("contact_phone_field")) and contractor.phone != "":
+    if (
+        contact_phone_field := amo_config.get("contact_phone_field")
+    ) and contractor.phone != "":
         append_value(contact_phone_field, contractor.phone)
-    if (contact_email_id := amo_config.get("contact_email_field")) and contractor.email != "":
+    if (
+        contact_email_id := amo_config.get("contact_email_field")
+    ) and contractor.email != "":
         append_value(contact_email_id, contractor.email)
 
-    logger.debug(f"Перед созданием контакта, данные: {contractor.name} , {custom_fields}")
+    logger.debug(
+        f"Перед созданием контакта, данные: {contractor.name} , {custom_fields}"
+    )
 
     try:
-        amo_contact = (api.update_contact(contractor.amo_id, custom_fields=custom_fields)
-                       .get("_embedded",{})).get("contacts", [None])[0]
-        
+        amo_contact = (
+            api.update_contact(contractor.amo_id, custom_fields=custom_fields).get(
+                "_embedded", {}
+            )
+        ).get("contacts", [None])[0]
+
         logger.debug(f"Обновлен контакт {amo_contact}")
-        
+
     except Exception as error:
 
         logger.error(f"Ошибка в обновлении контакта: {error} {custom_fields}")
         return
-    
+
     if amo_contact is None:
         return
     contractor.amo_id = amo_contact.get("id")
     contractor.save()
+    return contractor

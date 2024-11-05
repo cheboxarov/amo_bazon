@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('amo', '0002_remove_amoaccount_token'),
+        ("amo", "0002_remove_amoaccount_token"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='amoaccount',
-            name='token',
+            model_name="amoaccount",
+            name="token",
             field=models.TextField(default=1),
             preserve_default=False,
         ),

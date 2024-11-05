@@ -12,7 +12,8 @@ class AmoAccount(models.Model):
         "contact_email_field": 0,
         "company_phone_field": 0,
         "company_email_field": 0,
-        "company_inn_field": 0
+        "company_inn_field": 0,
+        "bazon_field": 0
     }))
 
 
@@ -34,6 +35,9 @@ class AmoAccount(models.Model):
     
     def get_company_client(self):
         return CompanyClient(self.token, self.suburl)
+    
+    def get_config(self) -> dict:
+        return json.loads(self.config)
 
 class Status(models.Model):
     BAZON_STATUSES = [

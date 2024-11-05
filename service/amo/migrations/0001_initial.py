@@ -8,53 +8,139 @@ class Migration(migrations.Migration):
 
     initial = True
 
-    dependencies = [
-    ]
+    dependencies = []
 
     operations = [
         migrations.CreateModel(
-            name='AmoAccount',
+            name="AmoAccount",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('suburl', models.CharField(max_length=255, unique=True, verbose_name='Поддомен')),
-                ('token', models.TextField(verbose_name='Токен')),
-                ('config', models.JSONField(default='{"contact_phone_field": 0, "contact_email_field": 0, "company_phone_field": 0, "company_email_field": 0, "company_inn_field": 0}')),
-                ('bazon_accounts', models.ManyToManyField(related_name='amo_accounts', to='bazon.bazonaccount', verbose_name='Аккаунты Bazon')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                (
+                    "suburl",
+                    models.CharField(
+                        max_length=255, unique=True, verbose_name="Поддомен"
+                    ),
+                ),
+                ("token", models.TextField(verbose_name="Токен")),
+                (
+                    "config",
+                    models.JSONField(
+                        default='{"contact_phone_field": 0, "contact_email_field": 0, "company_phone_field": 0, "company_email_field": 0, "company_inn_field": 0}'
+                    ),
+                ),
+                (
+                    "bazon_accounts",
+                    models.ManyToManyField(
+                        related_name="amo_accounts",
+                        to="bazon.bazonaccount",
+                        verbose_name="Аккаунты Bazon",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Аккаунт AmoCRM',
-                'verbose_name_plural': 'Аккаунты AmoCRM',
+                "verbose_name": "Аккаунт AmoCRM",
+                "verbose_name_plural": "Аккаунты AmoCRM",
             },
         ),
         migrations.CreateModel(
-            name='Manager',
+            name="Manager",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(max_length=255, verbose_name='Имя')),
-                ('amo_id', models.IntegerField(verbose_name='ID в AmoCRM')),
-                ('bazon_id', models.IntegerField(blank=True, null=True, verbose_name='ID в Bazon')),
-                ('amo_account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='managers', to='amo.amoaccount', verbose_name='Аккаунт AmoCRM')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("name", models.CharField(max_length=255, verbose_name="Имя")),
+                ("amo_id", models.IntegerField(verbose_name="ID в AmoCRM")),
+                (
+                    "bazon_id",
+                    models.IntegerField(
+                        blank=True, null=True, verbose_name="ID в Bazon"
+                    ),
+                ),
+                (
+                    "amo_account",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="managers",
+                        to="amo.amoaccount",
+                        verbose_name="Аккаунт AmoCRM",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Менеджер',
-                'verbose_name_plural': 'Менеджеры',
+                "verbose_name": "Менеджер",
+                "verbose_name_plural": "Менеджеры",
             },
         ),
         migrations.CreateModel(
-            name='Status',
+            name="Status",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('amo_id', models.IntegerField(verbose_name='ID в AmoCRM')),
-                ('name', models.CharField(max_length=255, verbose_name='Имя')),
-                ('pipeline_name', models.CharField(max_length=255, verbose_name='Название воронки')),
-                ('pipeline_id', models.PositiveBigIntegerField(verbose_name='Айди воронки')),
-                ('bazon_status', models.CharField(blank=True, choices=[('draft', 'Новый'), ('reserve', 'В работе'), ('issued', 'Выданные'), ('canceled', 'Не реализованные')], max_length=20, null=True, verbose_name='Статус в Bazon')),
-                ('amo_account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='statuses', to='amo.amoaccount', verbose_name='Аккаунт в AmoCRM')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("amo_id", models.IntegerField(verbose_name="ID в AmoCRM")),
+                ("name", models.CharField(max_length=255, verbose_name="Имя")),
+                (
+                    "pipeline_name",
+                    models.CharField(max_length=255, verbose_name="Название воронки"),
+                ),
+                (
+                    "pipeline_id",
+                    models.PositiveBigIntegerField(verbose_name="Айди воронки"),
+                ),
+                (
+                    "bazon_status",
+                    models.CharField(
+                        blank=True,
+                        choices=[
+                            ("draft", "Новый"),
+                            ("reserve", "В работе"),
+                            ("issued", "Выданные"),
+                            ("canceled", "Не реализованные"),
+                        ],
+                        max_length=20,
+                        null=True,
+                        verbose_name="Статус в Bazon",
+                    ),
+                ),
+                (
+                    "amo_account",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="statuses",
+                        to="amo.amoaccount",
+                        verbose_name="Аккаунт в AmoCRM",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Статус воронки',
-                'verbose_name_plural': 'Статусы воронок',
-                'constraints': [models.UniqueConstraint(fields=('pipeline_id', 'amo_id'), name='unique_pipeline_id_amo_id')],
+                "verbose_name": "Статус воронки",
+                "verbose_name_plural": "Статусы воронок",
+                "constraints": [
+                    models.UniqueConstraint(
+                        fields=("pipeline_id", "amo_id"),
+                        name="unique_pipeline_id_amo_id",
+                    )
+                ],
             },
         ),
     ]

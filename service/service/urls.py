@@ -16,7 +16,7 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include 
+from django.urls import path, include
 from amo.views import AmoWebhookView
 
 
@@ -28,7 +28,8 @@ urlpatterns = [
                 path("grappelli/", include("grappelli.urls")),
                 path("admin/", admin.site.urls),
                 path("", include("bazon.urls")),
-                path("amo-webhook/<str:subdomain>", AmoWebhookView.as_view())
+                path("amo-webhook/<str:subdomain>", AmoWebhookView.as_view()),
+                path("", "amo.urls")
             ]
         ),
     )

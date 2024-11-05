@@ -40,18 +40,24 @@ class AmoCRMClient:
         response = requests.get(url, headers=self._get_headers())
         response.raise_for_status()
         return response.json()
-    
-    def link_entity(self, to_type: str, to_id: int, e_type: str, e_id: str, metadata: Optional[dict] = None):
+
+    def link_entity(
+        self,
+        to_type: str,
+        to_id: int,
+        e_type: str,
+        e_id: str,
+        metadata: Optional[dict] = None,
+    ):
         """
         e_type - leads | contacts | companies | customers
         to_type - leads | contacts | companies | customers | catalog_elements
         """
-        payload = [{
-            "to_entity_id": to_id,
-            "to_entity_type": to_type
-        }]
+        payload = [{"to_entity_id": to_id, "to_entity_type": to_type}]
         if metadata:
-            payload["metadata"] = LinkMetadataModel.model_validate(metadata).model_dump()
+            payload["metadata"] = LinkMetadataModel.model_validate(
+                metadata
+            ).model_dump()
         return self.session.post(f"{self.base_url}/{e_type}/{e_id}/link", json=payload)
 
 
@@ -123,7 +129,7 @@ class ContactClient(AmoCRMClient):
     """
 
     def create_contact(
-        self, name, responsible_user_id = None, custom_fields=None, company_id=None
+        self, name, responsible_user_id=None, custom_fields=None, company_id=None
     ):
         url = f"{self.base_url}/contacts"
         data = {"name": name}

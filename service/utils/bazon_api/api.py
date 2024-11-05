@@ -15,8 +15,10 @@ def bazon_response_check(func):
         response_data: dict = data.get("response", {})
         try:
             for key, response_item in response_data.items():
-                if (error := response_item.get("error")):
-                    logger.error(f"Ошибочный ответ от базона по методу {func.__name__} args({args}) kwargs({kwargs}):\n{error}")
+                if error := response_item.get("error"):
+                    logger.error(
+                        f"Ошибочный ответ от базона по методу {func.__name__} args({args}) kwargs({kwargs}):\n{error}"
+                    )
                     if error == "invalid_lock":
                         raise APIException(detail="invalid_key_lock", code=403)
         except APIException:
@@ -24,6 +26,7 @@ def bazon_response_check(func):
         except Exception as err:
             pass
         return response
+
     return wrapper
 
 
@@ -319,13 +322,7 @@ class Bazon:
     @bazon_response_check
     def get_contractor(self, contractor_id: int):
 
-        payload = {
-            "request": {
-                "getContractor": {
-                    "id": contractor_id
-                }
-            }
-        }
+        payload = {"request": {"getContractor": {"id": contractor_id}}}
 
         url = "https://kontrabaz.baz-on.ru/frontend-api/?getContractor"
 
@@ -700,17 +697,20 @@ class Bazon:
         )
 
     @bazon_response_check
-    def set_contractor(self, name: str, 
-                       phone: str,
-                       id: Optional[int] = None,
-                       email: str = "", 
-                       BIK: str = "", 
-                       INN: str = "", 
-                       KPP: str = "", 
-                       bank_name: str = "", 
-                       legal_name: str = "",
-                       legal_address: str = "", 
-                       real_adress: str = ""):
+    def set_contractor(
+        self,
+        name: str,
+        phone: str,
+        id: Optional[int] = None,
+        email: str = "",
+        BIK: str = "",
+        INN: str = "",
+        KPP: str = "",
+        bank_name: str = "",
+        legal_name: str = "",
+        legal_address: str = "",
+        real_adress: str = "",
+    ):
         payload = {
             "request": {
                 "setContractor": {
@@ -726,17 +726,21 @@ class Bazon:
                         "bankName": bank_name,
                         "name": legal_name,
                         "legalAddress": legal_address,
-                        "realAddress": real_adress
-                    }
+                        "realAddress": real_adress,
+                    },
                 }
-            }            
+            }
         }
 
-        if (id):
+        if id:
             payload["request"]["setContractor"]["id"] = id
 
-        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?setContractor", headers=self._headers, json=payload)
-    
+        return requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?setContractor",
+            headers=self._headers,
+            json=payload,
+        )
+
     @bazon_response_check
     def edit_item_cost(self, items: dict[str, int], document_id: int, lock_key: str):
         data = {
@@ -744,8 +748,12 @@ class Bazon:
                 "saleEditItemCost": {
                     "items": items,
                     "documentID": document_id,
-                    "lockKey": lock_key
+                    "lockKey": lock_key,
                 }
             }
         }
-        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?saleEditItemCost", headers=self._headers, json=data)
+        return requests.post(
+            "https://kontrabaz.baz-on.ru/frontend-api/?saleEditItemCost",
+            headers=self._headers,
+            json=data,
+        )

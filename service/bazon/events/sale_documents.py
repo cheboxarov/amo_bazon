@@ -11,7 +11,9 @@ from amo.amo_client import AmoCRMClient
 
 def create_deal(sale_data: dict, amo_account: AmoAccount):
     with transaction.atomic():
-        sale_document = SaleDocument.objects.create(amo_account=amo_account, **sale_data)
+        sale_document = SaleDocument.objects.create(
+            amo_account=amo_account, **sale_data
+        )
         serializer = BazonSaleToAmoLeadSerializer(amo_account, sale_data)
         serializer.serialize()
         serialized_data = serializer.get_serialized_data(with_id=False)
@@ -23,16 +25,17 @@ def create_deal(sale_data: dict, amo_account: AmoAccount):
         sale_document.save()
 
 
-def on_create_sale_document(
-    sale_data: dict,
-    amo_account: AmoAccount
-):
+def on_create_sale_document(sale_data: dict, amo_account: AmoAccount):
     create_deal(sale_data=sale_data, amo_account=amo_account)
-    query = SaleDocument.objects.filter(internal_id=sale_data.get("internal_id"), amo_account=amo_account)
+    query = SaleDocument.objects.filter(
+        internal_id=sale_data.get("internal_id"), amo_account=amo_account
+    )
     if not query.exists():
-        logger.error(f"Транзакция создания сделки закончилась с ошибкой.\nsale_data={sale_data}\namo_account={amo_account}")
+        logger.error(
+            f"Транзакция создания сделки закончилась с ошибкой.\nsale_data={sale_data}\namo_account={amo_account}"
+        )
         return
-    
+
     sale_document = query.first()
 
     if sale_document.contractor_id:
@@ -40,33 +43,50 @@ def on_create_sale_document(
             return
         api = sale_document.get_api()
         contractor_response = api.get_contractor(sale_document.contractor_id)
-        contractor_json = (contractor_response.json()
-                        .get("response", {})
-                        .get("getContractor", {})
-                        .get("Contractor"))
+        contractor_json = (
+            contractor_response.json()
+            .get("response", {})
+            .get("getContractor", {})
+            .get("Contractor")
+        )
         if contractor_json is None:
             return
-        query = Contractor.objects.filter(internal_id=sale_document.contractor_id, amo_account=amo_account)
+        query = Contractor.objects.filter(
+            internal_id=sale_document.contractor_id, amo_account=amo_account
+        )
         if not query.exists():
-            on_create_contractor(contractor_json,
-                                bazon_account=sale_document.bazon_account,
-                                amo_account=sale_document.amo_account)
+            on_create_contractor(
+                contractor_data=contractor_json,
+                bazon_account=sale_document.bazon_account,
+                amo_account=sale_document.amo_account,
+            )
         contractor: Contractor = query.first()
         if not contractor.amo_id:
             return
-        
+
         amo_client: AmoCRMClient = amo_account.get_amo_client()
 
-        response = amo_client.link_entity(to_type="contacts",
-                                          to_id=contractor.amo_id,
-                                          e_id=sale_document.amo_lead_id,
-                                          e_type="leads")
+        response = amo_client.link_entity(
+            to_type="contacts",
+            to_id=contractor.amo_id,
+            e_id=sale_document.amo_lead_id,
+            e_type="leads",
+        )
         if response.status_code != 200:
-            logger.error(f"Ошибка в линковке контакта к сделке, ответ от амо: {response.text}")
+            logger.error(
+                f"Ошибка в линковке контакта к сделке, ответ от амо: {response.text}"
+            )
             return
-        logger.debug(f"Контакт {contractor.amo_id} прилинкован к сделке {sale_document.amo_lead_id}")
+        logger.debug(
+            f"Контакт {contractor.amo_id} прилинкован к сделке {sale_document.amo_lead_id}"
+        )
 
-def on_update_sale_document(amo_account: AmoAccount, sale_data: dict | None = None, sale_document: SaleDocument | None = None):
+
+def on_update_sale_document(
+    amo_account: AmoAccount,
+    sale_data: dict | None = None,
+    sale_document: SaleDocument | None = None,
+):
 
     if sale_data is None and sale_document is None:
         raise ValueError("Sale data and document is None")
@@ -77,53 +97,69 @@ def on_update_sale_document(amo_account: AmoAccount, sale_data: dict | None = No
         serializer.serialize()
         serialized_data = serializer.get_serialized_data(with_id=True)
         amo_client = DealClient(amo_account.token, amo_account.suburl)
-        
+
         if serialized_data.get("id") is None:
             return
         logger.debug(f"Обновляю сделку в амо: {serialized_data}")
         response = amo_client.update_deal(**serialized_data)
 
-        sale_document = SaleDocument.objects.filter(amo_lead_id=(serialized_data.get("id"))).first()
+        sale_document = SaleDocument.objects.filter(
+            amo_lead_id=(serialized_data.get("id"))
+        ).first()
     if sale_document.contractor_id:
         if sale_document.contractor_id == 1:
             return
         api = sale_document.get_api()
         contractor_response = api.get_contractor(sale_document.contractor_id)
-        contractor_json = (contractor_response.json()
-                        .get("response", {})
-                        .get("getContractor", {})
-                        .get("Contractor"))
+        contractor_json = (
+            contractor_response.json()
+            .get("response", {})
+            .get("getContractor", {})
+            .get("Contractor")
+        )
         if contractor_json is None:
             return
-        query = Contractor.objects.filter(internal_id=sale_document.contractor_id, amo_account=amo_account)
+        query = Contractor.objects.filter(
+            internal_id=sale_document.contractor_id, amo_account=amo_account
+        )
         if not query.exists():
-            on_create_contractor(contractor_json,
-                                bazon_account=sale_document.bazon_account,
-                                amo_account=sale_document.amo_account)
+            on_create_contractor(
+                contractor_data=contractor_json,
+                bazon_account=sale_document.bazon_account,
+                amo_account=sale_document.amo_account,
+            )
             amo_client: AmoCRMClient = amo_account.get_amo_client()
 
             contractor: Contractor = query.first()
-            response = amo_client.link_entity(to_type="contacts",
-                                            to_id=contractor.amo_id,
-                                            e_id=sale_document.amo_lead_id,
-                                            e_type="leads")
+            response = amo_client.link_entity(
+                to_type="contacts",
+                to_id=contractor.amo_id,
+                e_id=sale_document.amo_lead_id,
+                e_type="leads",
+            )
             if response.status_code != 200:
-                logger.error(f"(обновление сделки) Ошибка в линковке контакта к сделке, ответ от амо: {response.text}")
+                logger.error(
+                    f"(обновление сделки) Ошибка в линковке контакта к сделке, ответ от амо: {response.text}"
+                )
                 return
             if not contractor.amo_id:
                 return
-            logger.debug(f"(Обновление сделки) Контакт {contractor.amo_id} прилинкован к сделке {sale_document.amo_lead_id}")
+            logger.debug(
+                f"(Обновление сделки) Контакт {contractor.amo_id} прилинкован к сделке {sale_document.amo_lead_id}"
+            )
         else:
             amo_client: AmoCRMClient = amo_account.get_amo_client()
             contractor: Contractor = query.first()
-            response = amo_client.link_entity(to_type="contacts",
-                                            to_id=contractor.amo_id,
-                                            e_id=sale_document.amo_lead_id,
-                                            e_type="leads")
+            response = amo_client.link_entity(
+                to_type="contacts",
+                to_id=contractor.amo_id,
+                e_id=sale_document.amo_lead_id,
+                e_type="leads",
+            )
             on_update_contractor(
                 contractor_json,
                 bazon_account=sale_document.bazon_account,
-                amo_account=sale_document.amo_account)
-        
+                amo_account=sale_document.amo_account,
+            )
+
         logger.debug(f"Обновлен контакт {contractor_json}")
-    

@@ -669,8 +669,12 @@ class BazonSaleEditView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 
         with sale_document.generate_lock_key() as lock_key:
             response = api.edit_sale(sale_document.internal_id, request.data, lock_key)
-            on_update_sale_document(sale_document=sale_document, amo_account=sale_document.amo_account)
-            logger.debug(f"[{subdomain}] Базон ответил на изменение сделки {response.json()} \n Тело запроса: {request.data}")
+            on_update_sale_document(
+                sale_document=sale_document, amo_account=sale_document.amo_account
+            )
+            logger.debug(
+                f"[{subdomain}] Базон ответил на изменение сделки {response.json()} \n Тело запроса: {request.data}"
+            )
 
         return self.return_response(response)
 
@@ -695,8 +699,6 @@ class BazonContractorsListView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         bazon_api = sale_docoument.get_api()
         response = bazon_api.get_contractors(offset, limit)
         return Response(response.json(), response.status_code)
-        
-        
 
 
 class BazonContractorApiView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
@@ -712,9 +714,10 @@ class BazonContractorApiView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
             return Response({"error": "not found contractor"}, status=404)
         api = sale_docoument.get_api()
         response = api.get_contractor(contractor_id)
-        logger.info(f"[{subdomain}] Получен контрагент с базона, статус ответа: {response.status_code}\nBody: {response.json()}")
+        logger.info(
+            f"[{subdomain}] Получен контрагент с базона, статус ответа: {response.status_code}\nBody: {response.json()}"
+        )
         return Response(response.json(), response.status_code)
-        
 
     def post(self, request, amo_lead_id: int):
         subdomain = self.check_origin(request)
@@ -724,7 +727,9 @@ class BazonContractorApiView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         data = request.data
         response = api.set_contractor(**data)
         response_json = response.json()
-        on_update_sale_document(sale_document=sale_document, amo_account=sale_document.amo_account)
+        on_update_sale_document(
+            sale_document=sale_document, amo_account=sale_document.amo_account
+        )
         return Response(response_json, status=response.status_code)
 
 
@@ -735,16 +740,20 @@ class BazonSaleUpdate(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         logger.info(f"[{subdomain}] Начало обработки запроса на обновление сделки")
         sale_document = self.get_sale_document(amo_lead_id)
         bazon_api = sale_document.get_api()
-        sale_document_data = bazon_api.get_detail_document(int(sale_document.number)).json()
+        sale_document_data = bazon_api.get_detail_document(
+            int(sale_document.number)
+        ).json()
         logger.debug(f"Акутализирую сделку - {sale_document_data}")
         document_json = sale_document_data["response"]["getDocument"]["Document"]
         document_json["internal_id"] = document_json.pop("id")
         try:
-            on_update_sale_document(sale_data=document_json, amo_account=sale_document.amo_account)
+            on_update_sale_document(
+                sale_data=document_json, amo_account=sale_document.amo_account
+            )
             return Response(data={"status": "ok"}, status=200)
         except Exception as err:
             return Response(status=500)
-        
+
 
 class BazonItemEditCost(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
 
@@ -755,5 +764,7 @@ class BazonItemEditCost(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         bazon_api = sale_document.get_api()
         data = request.data
         with sale_document.generate_lock_key() as lock_key:
-            response = bazon_api.edit_item_cost(data.get("items"), sale_document.internal_id, lock_key)
+            response = bazon_api.edit_item_cost(
+                data.get("items"), sale_document.internal_id, lock_key
+            )
         return Response(data=response.json(), status=response.status_code)

@@ -7,47 +7,64 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bazon', '0008_rename_amo_lead_id_contractor_amo_id'),
+        ("bazon", "0008_rename_amo_lead_id_contractor_amo_id"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='bazonaccount',
-            options={'verbose_name': 'Аккаунт Bazon', 'verbose_name_plural': 'Аккаунты Bazon'},
+            name="bazonaccount",
+            options={
+                "verbose_name": "Аккаунт Bazon",
+                "verbose_name_plural": "Аккаунты Bazon",
+            },
         ),
         migrations.AlterModelOptions(
-            name='contractor',
-            options={'verbose_name': 'Контрагент в Bazon', 'verbose_name_plural': 'Контрагенты в Bazon'},
+            name="contractor",
+            options={
+                "verbose_name": "Контрагент в Bazon",
+                "verbose_name_plural": "Контрагенты в Bazon",
+            },
         ),
         migrations.AlterModelOptions(
-            name='saledocument',
-            options={'verbose_name': 'Сделка в Bazon', 'verbose_name_plural': 'Сделки в Bazon'},
+            name="saledocument",
+            options={
+                "verbose_name": "Сделка в Bazon",
+                "verbose_name_plural": "Сделки в Bazon",
+            },
         ),
         migrations.AddField(
-            model_name='contractor',
-            name='amo_account',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='amo.amoaccount'),
+            model_name="contractor",
+            name="amo_account",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="amo.amoaccount",
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='saledocument',
-            name='amo_account',
-            field=models.ForeignKey(default=1, on_delete=django.db.models.deletion.CASCADE, to='amo.amoaccount'),
+            model_name="saledocument",
+            name="amo_account",
+            field=models.ForeignKey(
+                default=1,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="amo.amoaccount",
+            ),
             preserve_default=False,
         ),
         migrations.AddField(
-            model_name='saledocument',
-            name='contractor_linked',
+            model_name="saledocument",
+            name="contractor_linked",
             field=models.BooleanField(default=False),
         ),
         migrations.AlterField(
-            model_name='contractor',
-            name='internal_id',
+            model_name="contractor",
+            name="internal_id",
             field=models.PositiveIntegerField(),
         ),
         migrations.AlterField(
-            model_name='saledocument',
-            name='internal_id',
+            model_name="saledocument",
+            name="internal_id",
             field=models.PositiveIntegerField(),
         ),
     ]

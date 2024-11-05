@@ -6,18 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bazon', '0006_rename_balance_reverse_contractor_balance_reserve'),
+        ("bazon", "0006_rename_balance_reverse_contractor_balance_reserve"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='contractor',
-            name='phone',
+            model_name="contractor",
+            name="phone",
             field=models.CharField(blank=True, max_length=50, null=True),
         ),
         migrations.AlterField(
-            model_name='contractor',
-            name='type',
+            model_name="contractor",
+            name="type",
             field=models.CharField(max_length=50),
         ),
     ]

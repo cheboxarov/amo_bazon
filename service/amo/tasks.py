@@ -16,12 +16,14 @@ def sync_amo_data():
         for pipeline in statuses_data["_embedded"]["pipelines"]:
             for status_data in pipeline["_embedded"]["statuses"]:
                 status_queryset = Status.objects.filter(
-                    amo_id=status_data["id"], amo_account=amo_account, pipeline_id=pipeline.get("id")
+                    amo_id=status_data["id"],
+                    amo_account=amo_account,
+                    pipeline_id=pipeline.get("id"),
                 )
                 if status_queryset.exists():
                     status_queryset.update(
                         name=f'{status_data["name"]}',
-                        pipeline_name=pipeline.get("name")
+                        pipeline_name=pipeline.get("name"),
                     )
                 else:
                     # Добавление нового статуса
@@ -30,7 +32,7 @@ def sync_amo_data():
                         name=f'{status_data["name"]} ({pipeline["name"]})',
                         amo_account=amo_account,
                         pipeline_id=pipeline.get("id"),
-                        pipeline_name=pipeline.get("name")
+                        pipeline_name=pipeline.get("name"),
                     )
 
         Status.objects.filter(amo_account=amo_account).exclude(

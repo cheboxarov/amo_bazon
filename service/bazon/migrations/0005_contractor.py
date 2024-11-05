@@ -7,25 +7,39 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('bazon', '0004_saledocument_amo_lead_id'),
+        ("bazon", "0004_saledocument_amo_lead_id"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Contractor',
+            name="Contractor",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('internal_id', models.PositiveIntegerField(unique=True)),
-                ('name', models.CharField(max_length=255)),
-                ('type', models.CharField(max_length=30)),
-                ('phone', models.CharField(blank=True, max_length=12, null=True)),
-                ('email', models.CharField(blank=True, max_length=50, null=True)),
-                ('manager_comment', models.TextField(blank=True, null=True)),
-                ('balance_free', models.PositiveIntegerField()),
-                ('balance_reverse', models.PositiveIntegerField()),
-                ('balance', models.PositiveIntegerField()),
-                ('amo_lead_id', models.PositiveIntegerField(blank=True, null=True)),
-                ('bazon_account', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bazon.bazonaccount')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("internal_id", models.PositiveIntegerField(unique=True)),
+                ("name", models.CharField(max_length=255)),
+                ("type", models.CharField(max_length=30)),
+                ("phone", models.CharField(blank=True, max_length=12, null=True)),
+                ("email", models.CharField(blank=True, max_length=50, null=True)),
+                ("manager_comment", models.TextField(blank=True, null=True)),
+                ("balance_free", models.PositiveIntegerField()),
+                ("balance_reverse", models.PositiveIntegerField()),
+                ("balance", models.PositiveIntegerField()),
+                ("amo_lead_id", models.PositiveIntegerField(blank=True, null=True)),
+                (
+                    "bazon_account",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="bazon.bazonaccount",
+                    ),
+                ),
             ],
         ),
     ]
