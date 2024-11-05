@@ -29,7 +29,7 @@ urlpatterns = [
                 path("admin/", admin.site.urls),
                 path("", include("bazon.urls")),
                 path("amo-webhook/<str:subdomain>", AmoWebhookView.as_view()),
-                path("", "amo.urls")
+                path("", include("amo.urls"))
             ]
         ),
     )
