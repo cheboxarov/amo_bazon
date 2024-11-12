@@ -778,13 +778,13 @@ class Bazon:
         return requests.post(url, headers=self._headers, json=data)
     
     @bazon_response_check
-    def generate_receipt_request(self, document_id: int, factory_number: int):
+    def generate_receipt_request(self, document_id: int, factory_number: str):
         logger.debug(f"generate_receipt_request({document_id}, {factory_number})")
         data = {
             "request": {
                 "generateReceiptRequest": {
                     "documentID": document_id,
-                    "factoryNumber": str(factory_number),
+                    "factoryNumber": factory_number,
                     "_": ""
                 },
                 "getOperations": {
@@ -813,7 +813,7 @@ class Bazon:
     @bazon_response_check
     def sale_receipt_process(self, 
                              document_id: int, 
-                             factory_number: int, 
+                             factory_number: str, 
                              cash_machine: int, 
                              contact: str,
                              cash: int,
@@ -823,7 +823,7 @@ class Bazon:
             "request": {
                 "saleReceiptProcess": {
                     "documentID": document_id,
-                    "factoryNumber": str(factory_number),
+                    "factoryNumber": factory_number,
                     "cashMachine": str(cash_machine),
                     "operationType": "SALE_PAY",
                     "customerContact": contact,
