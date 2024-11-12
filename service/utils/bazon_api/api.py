@@ -786,6 +786,7 @@ class Bazon:
                     "factoryNumber": str(factory_number)
                 },
                 "getOperations": {
+                    "viewMode": "raw",
                     "where": {
                         "documentID": document_id
                     }
