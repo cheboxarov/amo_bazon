@@ -13,7 +13,7 @@ def bazon_response_check(func):
         response = func(*args, **kwargs)
         try:
             data: dict = response.json()
-        except requests.exceptions.JSONDecodeError:
+        except requests.exceptions.JSONDecodeError as error:
             logger.error(f"Error to parse response body ({func.__name__}) args({args}) kwargs({kwargs})\n{error}")
             return response
         response_data: dict = data.get("response", {})
