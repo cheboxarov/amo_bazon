@@ -25,7 +25,8 @@ from .views import (
     BazonGetCashMachinesView, 
     BazonCreateReceiptView,
     BazonGenerateReceiptRequest,
-    BazonReceiptState
+    BazonReceiptState,
+    BazonGetReceiptsView
 )
 
 urlpatterns = [
@@ -61,5 +62,6 @@ urlpatterns = [
     path("bazon-sale/<int:amo_lead_id>/cash-machines", BazonGetCashMachinesView.as_view()),
     path("bazon-sale/<int:amo_lead_id>/receipt", BazonCreateReceiptView.as_view()),
     path("bazon-sale/<int:amo_lead_id>/receipt-gen", BazonGenerateReceiptRequest.as_view()),
-    path("bazon-sale/<int:amo_lead_id>/receipt/<int:receipt_id>", BazonReceiptState.as_view())
+    path("bazon-sale/<int:amo_lead_id>/receipt/<int:receipt_id>", BazonReceiptState.as_view()),
+    path("bazon-sale/<int:amo_lead_id>/receipts", BazonGetReceiptsView.as_view())
 ]

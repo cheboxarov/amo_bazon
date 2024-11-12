@@ -831,3 +831,13 @@ class BazonReceiptState(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         response = api.get_receipt_state(sale_document.internal_id, receipt_id)
         return Response(response.json(), response.status_code)
     
+
+class BazonGetReceiptsView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
+
+    def get(self, request: Request, amo_lead_id: int):
+        subdomain = self.check_origin(request)
+        logger.debug(f"[{subdomain}] BazonReceiptState start")
+        sale_document = self.get_sale_document(amo_lead_id)
+        api = sale_document.get_api()
+        response = api.get_receipts(sale_document.internal_id)
+        return Response(response.json(), response.status_code)

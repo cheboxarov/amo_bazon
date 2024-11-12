@@ -809,6 +809,23 @@ class Bazon:
             }
         }
         return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getReceiptState", headers=self._headers, json=data)
+    
+    @bazon_response_check
+    def get_receipts(self, document_id: int):
+        data = {
+            "request": {
+                "getReceipts": {
+                    "where": {
+                        "documentID": document_id
+                    },
+                    "order": {
+                        "id": "asc"
+                    },
+                    "_": ""
+                }
+            }
+        }
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getReceipts", headers=self._headers, json=data)
 
     @bazon_response_check
     def sale_receipt_process(self, 
