@@ -779,17 +779,20 @@ class Bazon:
     
     @bazon_response_check
     def generate_receipt_request(self, document_id: int, factory_number: int):
+        logger.debug(f"generate_receipt_request({document_id}, {factory_number})")
         data = {
             "request": {
                 "generateReceiptRequest": {
                     "documentID": document_id,
-                    "factoryNumber": str(factory_number)
+                    "factoryNumber": str(factory_number),
+                    "_": ""
                 },
                 "getOperations": {
                     "viewMode": "raw",
                     "where": {
                         "documentID": document_id
-                    }
+                    },
+                    "_": ""
                 }
             }
         }
