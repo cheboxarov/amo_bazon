@@ -12,6 +12,7 @@ def bazon_response_check(func):
     def wrapper(*args, **kwargs):
         response = func(*args, **kwargs)
         if response.status_code == 500:
+            logger.error(f"Bazon response has 500 status code ({func.__name__}) args({args}) kwargs({kwargs})\n{error}")
             raise APIException(detail="bazon response error", code=500)
         try:
             data: dict = response.json()
