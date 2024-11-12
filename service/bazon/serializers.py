@@ -31,7 +31,7 @@ class CreateSaleSerializer(serializers.Serializer):
 
 class CreateReceiptSerializer(serializers.Serializer):
     factory_number = serializers.CharField(required=True)
-    cash_machine = serializers.IntegerField(required=True)
+    cash_machine = serializers.CharField(required=True)
     contacts = serializers.CharField(required=True)
     cash = serializers.IntegerField(required=True)
     electron = serializers.IntegerField(required=True)

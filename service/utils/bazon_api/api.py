@@ -814,7 +814,7 @@ class Bazon:
     def sale_receipt_process(self, 
                              document_id: int, 
                              factory_number: str, 
-                             cash_machine: int, 
+                             cash_machine: str, 
                              contact: str,
                              cash: int,
                              electron: int,
@@ -824,13 +824,13 @@ class Bazon:
                 "saleReceiptProcess": {
                     "documentID": document_id,
                     "factoryNumber": factory_number,
-                    "cashMachine": str(cash_machine),
+                    "cashMachine": cash_machine,
                     "operationType": "SALE_PAY",
                     "customerContact": contact,
                     "ignoreState": False,
                     "sumParts": {
-                        "CASH": cash,
-                        "ELECTRON": electron
+                        "CASH": str(cash),
+                        "ELECTRON": str(electron)
                     },
                     "sum": str(float(cash+electron)),
                     "lockKey": lock_key
