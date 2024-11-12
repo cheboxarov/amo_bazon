@@ -10,6 +10,8 @@ from .serializers import (
     AddSalePaySerializer,
     PayBackSaleSerializer,
     CreateSaleSerializer,
+    CreateReceiptSerializer,
+    GenerateReceiptRequestSerializer
 )
 from amo.models import AmoAccount
 from utils.serializers.bazon_serializers import ItemsListSerializer
@@ -768,3 +770,64 @@ class BazonItemEditCost(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
                 data.get("items"), sale_document.internal_id, lock_key
             )
         return Response(data=response.json(), status=response.status_code)
+
+
+class BazonGetCashMachinesView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
+
+    def get(self, request: Request, amo_lead_id):
+        subdomain = self.check_origin(request)
+        logger.debug(f"[{subdomain}] Начало обработки запроса на получение кеш машин")
+        sale_document = self.get_sale_document(amo_lead_id)
+        api = sale_document.get_api()
+        response = api.get_cash_machines()
+        return Response(response.json(), response.status_code)
+
+
+class BazonCreateReceiptView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
+
+    def post(self, request: Request, amo_lead_id: int):
+        subdomain = self.check_origin(request)
+        logger.debug(f"[{subdomain}] Начало обработки запроса печати чека")
+        sale_document = self.get_sale_document(amo_lead_id)
+        bazon_api = sale_document.get_api()
+        data = request.data
+        serializer = CreateReceiptSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        valid_data = serializer.validated_data
+        with sale_document.generate_lock_key() as lock_key:
+            response = bazon_api.sale_receipt_process(sale_document.internal_id,
+                                           valid_data.get("factory_number"),
+                                           valid_data.get("cash_machine"),
+                                           valid_data.get("contact"),
+                                           valid_data.get("cash"),
+                                           valid_data.get("electron"),
+                                           lock_key)
+        return Response(response.json(), response.status_code)
+    
+
+class BazonGenerateReceiptRequest(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
+    
+    def post(self, request: Request, amo_lead_id: int):
+        subdomain = self.check_origin(request)
+        logger.debug(f"[{subdomain}] BazonGenerateReceiptRequest")
+        data = request.data
+        serializer = GenerateReceiptRequestSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+        factory_number = validated_data.get("factory_number")
+        sale_document = self.get_sale_document(amo_lead_id)
+        api = sale_document.get_api()
+        response = api.generate_receipt_request(sale_document.internal_id, factory_number)
+        return Response(response.json(), response.status_code)
+        
+
+class BazonReceiptState(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
+    
+    def get(self, request: Request, amo_lead_id: int, receipt_id: int):
+        subdomain = self.check_origin(request)
+        logger.debug(f"[{subdomain}] BazonReceiptState")
+        sale_document = self.get_sale_document(amo_lead_id)
+        api = sale_document.get_api()
+        response = api.get_receipt_state(sale_document.internal_id, receipt_id)
+        return Response(response.json(), response.status_code)
+    

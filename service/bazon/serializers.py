@@ -28,3 +28,13 @@ class CreateSaleSerializer(serializers.Serializer):
     storage = serializers.IntegerField(required=True)
     manager = serializers.IntegerField(required=True)
     amoLeadId = serializers.IntegerField(required=True)
+
+class CreateReceiptSerializer(serializers.Serializer):
+    factory_number = serializers.IntegerField(required=True)
+    cash_machine = serializers.IntegerField(required=True)
+    contacts = serializers.CharField(required=True)
+    cash = serializers.IntegerField(required=True)
+    electron = serializers.IntegerField(required=True)
+
+class GenerateReceiptRequestSerializer(serializers.Serializer):
+    factory_number = serializers.IntegerField(required=True)

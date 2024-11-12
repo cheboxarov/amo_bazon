@@ -22,6 +22,10 @@ from .views import (
     BazonContractorsListView,
     BazonSaleUpdate,
     BazonItemEditCost,
+    BazonGetCashMachinesView, 
+    BazonCreateReceiptView,
+    BazonGenerateReceiptRequest,
+    BazonReceiptState
 )
 
 urlpatterns = [
@@ -54,4 +58,8 @@ urlpatterns = [
     ),
     path("bazon-sale/<int:amo_lead_id>/update", BazonSaleUpdate.as_view()),
     path("bazon-sale/<int:amo_lead_id>/items-edit-const", BazonItemEditCost.as_view()),
+    path("bazon-sale/<int:amo_lead_id>/cash-machines", BazonGetCashMachinesView.as_view()),
+    path("bazon-sale/<int:amo_lead_id>/receipt", BazonCreateReceiptView.as_view()),
+    path("bazon-sale/<int:amo_lead_id>/receipt-gen", BazonGenerateReceiptRequest.as_view()),
+    path("bazon-sale/<int:amo_lead_id>/receipt/<int:receipt_id>", BazonReceiptState.as_view())
 ]

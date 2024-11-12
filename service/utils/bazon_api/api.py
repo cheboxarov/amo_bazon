@@ -757,3 +757,73 @@ class Bazon:
             headers=self._headers,
             json=data,
         )
+    
+    @bazon_response_check
+    def get_cash_machines(self):
+        data = {
+            "request": {
+                "getCashMachines": {
+                    "viewMode": "raw"
+                }
+            }
+        }
+        url = "https://kontrabaz.baz-on.ru/frontend-api/?getCashMachines"
+        return requests.post(url, headers=self._headers, json=data)
+    
+    @bazon_response_check
+    def generate_receipt_request(self, document_id: int, factory_number: int):
+        data = {
+            "request": {
+                "generateReceiptRequest": {
+                    "documentID": document_id,
+                    "factoryNumber": str(factory_number)
+                },
+                "getOperations": {
+                    "where": {
+                        "documentID": document_id
+                    }
+                }
+            }
+        }
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?generateReceiptRequest,getOperations", headers=self._headers, json=data)
+    
+    @bazon_response_check
+    def get_receipt_state(self, document_id: int, receipt_id: int):
+        data = {
+            "request": {
+                "getReceiptState": {
+                    "documentID": document_id,
+                    "receiptID": receipt_id
+                }
+            }
+        }
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getReceiptState", headers=self._headers, json=data)
+
+    @bazon_response_check
+    def sale_receipt_process(self, 
+                             document_id: int, 
+                             factory_number: int, 
+                             cash_machine: int, 
+                             contact: str,
+                             cash: int,
+                             electron: int,
+                             lock_key: str):
+        data = {
+            "request": {
+                "saleReceiptProcess": {
+                    "documentID": document_id,
+                    "factoryNumber": str(factory_number),
+                    "cashMachine": str(cash_machine),
+                    "operationType": "SALE_PAY",
+                    "customerContact": contact,
+                    "ignoreState": False,
+                    "sumParts": {
+                        "CASH": cash,
+                        "ELECTRON": electron
+                    },
+                    "sum": str(float(cash+electron)),
+                    "lockKey": lock_key
+                }
+            }
+        }
+        return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?saleReceiptProcess", headers=self._headers, json=data)
