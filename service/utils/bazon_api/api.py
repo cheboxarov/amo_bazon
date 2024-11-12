@@ -11,12 +11,16 @@ from rest_framework.exceptions import APIException
 def bazon_response_check(func):
     def wrapper(*args, **kwargs):
         response = func(*args, **kwargs)
-        data: dict = response.json()
+        try:
+            data: dict = response.json()
+        except requests.exceptions.JSONDecodeError:
+            logger.error(f"Error to parse response body ({func.__name__}) args({args}) kwargs({kwargs})\n{error}")
+            return response
         response_data: dict = data.get("response", {})
         try:
             for key, response_item in response_data.items():
                 if error := response_item.get("error"):
-                    logger.error(
+                    logger.error( 
                         f"Ошибочный ответ от базона по методу {func.__name__} args({args}) kwargs({kwargs}):\n{error}"
                     )
                     if error == "invalid_lock":
