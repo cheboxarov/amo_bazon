@@ -795,7 +795,7 @@ class BazonCreateReceiptView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
         serializer.is_valid(raise_exception=True)
         valid_data = serializer.validated_data
         with sale_document.generate_lock_key() as lock_key:
-            response = bazon_api.sale_receipt_process(sale_document.internal_id,
+            response = bazon_api.receipt_pay(sale_document.internal_id,
                                            valid_data.get("factory_number"),
                                            valid_data.get("cash_machine"),
                                            valid_data.get("contact"),
@@ -803,7 +803,27 @@ class BazonCreateReceiptView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
                                            valid_data.get("electron"),
                                            lock_key)
         return Response(response.json(), response.status_code)
-    
+
+class BazonRefundReceiptView(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
+
+    def post(self, request: Request, amo_lead_id: int):
+        subdomain = self.check_origin(request)
+        logger.debug(f"[{subdomain}] Начало обработки запроса печати чека")
+        sale_document = self.get_sale_document(amo_lead_id)
+        bazon_api = sale_document.get_api()
+        data = request.data
+        serializer = CreateReceiptSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        valid_data = serializer.validated_data
+        with sale_document.generate_lock_key() as lock_key:
+            response = bazon_api.receipt_refund(sale_document.internal_id,
+                                           valid_data.get("factory_number"),
+                                           valid_data.get("cash_machine"),
+                                           valid_data.get("contact"),
+                                           valid_data.get("cash"),
+                                           valid_data.get("electron"),
+                                           lock_key)
+        return Response(response.json(), response.status_code)
 
 class BazonGenerateReceiptRequest(CustomAPIView, BazonApiMixin, SaleDocumentMixin):
     

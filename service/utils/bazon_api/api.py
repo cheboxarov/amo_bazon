@@ -827,6 +827,24 @@ class Bazon:
         }
         return requests.post("https://kontrabaz.baz-on.ru/frontend-api/?getReceipts", headers=self._headers, json=data)
 
+    def receipt_pay(self, document_id: int, 
+                             factory_number: str, 
+                             cash_machine: str, 
+                             contact: str,
+                             cash: int,
+                             electron: int,
+                             lock_key: str):
+        return self.sale_receipt_process(document_id, factory_number, cash_machine, contact, cash, electron, lock_key, "SALE_PAY")
+
+    def receipt_refund(self, document_id: int, 
+                             factory_number: str, 
+                             cash_machine: str, 
+                             contact: str,
+                             cash: int,
+                             electron: int,
+                             lock_key: str):
+        return self.sale_receipt_process(document_id, factory_number, cash_machine, contact, cash, electron, lock_key, "SALE_REFUND")
+
     @bazon_response_check
     def sale_receipt_process(self, 
                              document_id: int, 
@@ -835,14 +853,15 @@ class Bazon:
                              contact: str,
                              cash: int,
                              electron: int,
-                             lock_key: str):
+                             lock_key: str,
+                             operation_type):
         data = {
             "request": {
                 "saleReceiptProcess": {
                     "documentID": document_id,
                     "factoryNumber": factory_number,
                     "cashMachine": cash_machine,
-                    "operationType": "SALE_PAY",
+                    "operationType": operation_type,
                     "customerContact": contact,
                     "ignoreState": False,
                     "sumParts": {
